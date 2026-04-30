@@ -1,5 +1,7 @@
 from typing import List
 
+import click
+
 from models.models import BackupConfig, DbConfig
 from service.config_service import ask_config, build_restore_config
 from service.files_service import get_files
@@ -15,6 +17,7 @@ from utils.sql import build_restore_query, execute_sql_command
 
 
 def run_app():
+    click.clear()
     config = ask_config()
     # Obtener archivos
     files: List[str] = []
