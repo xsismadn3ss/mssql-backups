@@ -1,6 +1,7 @@
 import docker
 from docker.models.containers import Container
-from config.app import ContainerConfig, DbConfig
+
+from config.app import ContainerConfig
 
 
 def get_container(container_config: ContainerConfig) -> Container:
