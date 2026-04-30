@@ -1,7 +1,8 @@
+from abc import ABC
 from dataclasses import dataclass
 from os import getenv
-from abc import ABC
-from dotenv import load_dotenv  # type: ignore
+
+from dotenv import load_dotenv
 
 load_dotenv()  # Cargar variables de entorno desde el archivo .env
 
@@ -33,9 +34,9 @@ class DbConfig(ABCConfig):
 
 @dataclass(frozen=True)
 class ContainerConfig(ABCConfig):
-    name:str = getenv("CONTAINER_NAME", None) # type: ignore
-    backup_dir: str = getenv("CONTAINER_BACKUP_DIR", None) # type: ignore
-    data_dir: str = getenv("CONTAINER_DATA_DIR", None) # type: ignore
+    name: str = getenv("CONTAINER_NAME", None)  # type: ignore
+    backup_dir: str = getenv("CONTAINER_BACKUP_DIR", None)  # type: ignore
+    data_dir: str = getenv("CONTAINER_DATA_DIR", None)  # type: ignore
 
     @classmethod
     def validate(cls) -> None:
