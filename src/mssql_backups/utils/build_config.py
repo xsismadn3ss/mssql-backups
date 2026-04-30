@@ -2,9 +2,14 @@ from getpass import getpass
 
 import click
 
-from ..models.models import BackupConfig, ContainerConfig, DbConfig, DbConfigComplete
-from ..utils.colors import fore_green
-from ..utils.int import int_try_parse
+from mssql_backups.models.models import (
+    BackupConfig,
+    ContainerConfig,
+    DbConfig,
+    DbConfigComplete,
+)
+from mssql_backups.utils.colors import fore_green
+from mssql_backups.utils.int import int_try_parse
 
 
 def build_db_config() -> DbConfig:

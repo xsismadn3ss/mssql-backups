@@ -1,7 +1,7 @@
 import docker
 from docker.models.containers import Container
 
-from ..models.models import ContainerConfig
+from mssql_backups.models.models import ContainerConfig
 
 
 def get_container(container_config: ContainerConfig) -> Container:

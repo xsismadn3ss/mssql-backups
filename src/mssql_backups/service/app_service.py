@@ -2,10 +2,15 @@ from typing import List
 
 import click
 
-from ..models.models import BackupConfig, ContainerConfig, DbConfig, DbConfigComplete
-from ..service.config_service import ask_config, build_restore_config
-from ..service.files_service import get_files
-from ..utils.colors import (
+from mssql_backups.models.models import (
+    BackupConfig,
+    ContainerConfig,
+    DbConfig,
+    DbConfigComplete,
+)
+from mssql_backups.service.config_service import ask_config, build_restore_config
+from mssql_backups.service.files_service import get_files
+from mssql_backups.utils.colors import (
     fore_green,
     fore_light_cyan,
     fore_light_green,
@@ -13,7 +18,7 @@ from ..utils.colors import (
     style_bright,
     style_dim,
 )
-from ..utils.sql import build_restore_query, execute_sql_command
+from mssql_backups.utils.sql import build_restore_query, execute_sql_command
 
 
 def run_app():

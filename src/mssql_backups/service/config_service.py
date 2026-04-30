@@ -1,11 +1,16 @@
-from ..models.models import BackupConfig, ContainerConfig, DbConfig, DbConfigComplete
-from ..utils.build_config import (
+from mssql_backups.models.models import (
+    BackupConfig,
+    ContainerConfig,
+    DbConfig,
+    DbConfigComplete,
+)
+from mssql_backups.utils.build_config import (
     build_container_config,
     build_db_config,
     build_db_config_complete,
 )
-from ..utils.colors import style_bright
-from ..utils.int import int_try_parse
+from mssql_backups.utils.colors import style_bright
+from mssql_backups.utils.int import int_try_parse
 
 
 def ask_config() -> tuple[DbConfigComplete, ...] | tuple[DbConfig, ContainerConfig]:
