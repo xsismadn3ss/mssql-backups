@@ -1,5 +1,5 @@
 from config.app import DbConfig, ContainerConfig
-from utils.container import list_container_files, execute_sql_in_container
+from utils.container import list_container_files
 from constants.restore_db import SQL_COMMAND
 from constants.test_db import SQL_COMMAND as TEST_SQL_COMMAND
 
@@ -10,9 +10,6 @@ def main():
     # Listar archivos en el directorio de backup del contenedor
     backups: str = list_container_files(ContainerConfig.backup_dir)  # type: ignore
     files = backups.splitlines()
-
-    result = execute_sql_in_container(ContainerConfig, DbConfig, sql_command=TEST_SQL_COMMAND) # type: ignore
-    print(result)
     return
 
     for file in files:
