@@ -2,7 +2,7 @@ from typing import List
 
 import click
 
-from models.models import BackupConfig, DbConfig
+from models.models import BackupConfig, ContainerConfig, DbConfig, DbConfigComplete
 from service.config_service import ask_config, build_restore_config
 from service.files_service import get_files
 from utils.colors import (
@@ -22,9 +22,9 @@ def run_app():
     # Obtener archivos
     files: List[str] = []
 
-    if len(config) == 2:
+    if len(config) == 2 and isinstance(config[1], ContainerConfig):
         files = get_files(config[1])
-    elif len(config) == 1:
+    elif len(config) == 1 and isinstance(config[0], DbConfigComplete):
         files = get_files(config[0])
 
     print(style_bright(fore_green("Archivos de backups encontrados:")))
@@ -40,6 +40,7 @@ def run_app():
     c = config[1].model_dump() if len(config) == 2 else (config[0].model_dump())
     backup_config = BackupConfig(**c)
 
+    # Iterar archivos
     for i in files:
         backup_path, data_dir, db_name = build_restore_config(backup_config, i)
 
