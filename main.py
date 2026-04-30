@@ -1,4 +1,4 @@
-from src.service.app_service import run_app
+from src.mssql_backups.service.app_service import run_app
 
 
 def main():
