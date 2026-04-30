@@ -1,3 +1,5 @@
+from getpass import getpass
+
 from models.models import BackupConfig, ContainerConfig, DbConfig, DbConfigComplete
 from utils.colors import fore_green
 from utils.int import int_try_parse
@@ -5,7 +7,7 @@ from utils.int import int_try_parse
 
 def build_db_config() -> DbConfig:
     user = input(fore_green("DB_USER: "))
-    password = input(fore_green("DB_PASSWORD: "))
+    password = getpass(fore_green("DB_PASSWORD: "))
     host = input(fore_green("DB_HOST: "))
     port = input(fore_green("DB_PORT: "))
 
