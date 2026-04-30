@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "mssql-backups"
 version = "1.2.0"
@@ -13,3 +17,10 @@ dependencies = [
 
 [project.scripts]
 mssql-backups = "mssql_backups.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mssql_backups*"]
