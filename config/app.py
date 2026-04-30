@@ -34,9 +34,9 @@ class DbConfig(ABCConfig):
 
 @dataclass(frozen=True)
 class ContainerConfig(ABCConfig):
-    name: str = getenv("CONTAINER_NAME", None)  # type: ignore
-    backup_dir: str = getenv("CONTAINER_BACKUP_DIR", None)  # type: ignore
-    data_dir: str = getenv("CONTAINER_DATA_DIR", None)  # type: ignore
+    name = getenv("CONTAINER_NAME", None)
+    backup_dir = getenv("CONTAINER_BACKUP_DIR", None)
+    data_dir = getenv("CONTAINER_DATA_DIR", None)
 
     @classmethod
     def validate(cls) -> None:
