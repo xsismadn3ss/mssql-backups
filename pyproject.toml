@@ -1,6 +1,6 @@
 [project]
 name = "mssql-backups"
-version = "1.0.0"
+version = "1.0.1"
 description = "Aplicación de consola para restuarar base de datos en SQL Server indicando una carpeta con un listado de archivos de backup"
 readme = "README.md"
 requires-python = ">=3.12"
