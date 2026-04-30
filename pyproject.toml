@@ -11,3 +11,6 @@ dependencies = [
     "dotenv>=0.9.9",
     "pydantic>=2.13.3",
 ]
+
+[project.scripts]
+mssql-backups = "mssql_backups.cli:main"
