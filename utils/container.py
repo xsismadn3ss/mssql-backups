@@ -1,7 +1,7 @@
 import docker
 from docker.models.containers import Container
 
-from config.app import ContainerConfig
+from models.models import ContainerConfig
 
 
 def get_container(container_config: ContainerConfig) -> Container:
@@ -11,10 +11,10 @@ def get_container(container_config: ContainerConfig) -> Container:
     return container
 
 
-def list_container_files(path: str):
-    container: Container = get_container(ContainerConfig())
+def list_container_files(container_config: ContainerConfig):
+    container: Container = get_container(container_config)
     try:
-        exec_result = container.exec_run(f"ls {path}")
+        exec_result = container.exec_run(f"ls {container_config.backup_dir}")
         return exec_result.output.decode()
     except Exception as e:
         print(f"Error al listar archivos en el contenedor: {e}")
