@@ -2,10 +2,10 @@ from typing import List
 
 import click
 
-from src.models.models import BackupConfig, ContainerConfig, DbConfig, DbConfigComplete
-from src.service.config_service import ask_config, build_restore_config
-from src.service.files_service import get_files
-from src.utils.colors import (
+from ..models.models import BackupConfig, ContainerConfig, DbConfig, DbConfigComplete
+from ..service.config_service import ask_config, build_restore_config
+from ..service.files_service import get_files
+from ..utils.colors import (
     fore_green,
     fore_light_cyan,
     fore_light_green,
@@ -13,7 +13,7 @@ from src.utils.colors import (
     style_bright,
     style_dim,
 )
-from src.utils.sql import build_restore_query, execute_sql_command
+from ..utils.sql import build_restore_query, execute_sql_command
 
 
 def run_app():

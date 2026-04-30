@@ -1,8 +1,8 @@
 from typing import Dict, List, Tuple
 
-from src.constants.restore_db import SQL_COMMAND as RESTORE_DB
-from src.models.models import DbConfig
-from src.utils.terminal import execute_command
+from ..constants.restore_db import SQL_COMMAND as RESTORE_DB
+from ..models.models import DbConfig
+from ..utils.terminal import execute_command
 
 
 def _parse_filelist_output(output: str) -> List[Dict[str, str]]:

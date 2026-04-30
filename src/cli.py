@@ -1,4 +1,4 @@
-from src.service.app_service import run_app
+from service.app_service import run_app
 
 
 def main():
