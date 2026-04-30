@@ -1,8 +1,8 @@
 from typing import List
 
-from models.models import ContainerConfig, DbConfigComplete
-from utils.container import list_container_files
-from utils.terminal import execute_command
+from src.models.models import ContainerConfig, DbConfigComplete
+from src.utils.container import list_container_files
+from src.utils.terminal import execute_command
 
 
 def get_files(config: DbConfigComplete | ContainerConfig) -> List[str]:
