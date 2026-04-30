@@ -1,4 +1,4 @@
-# restore_all
+# MSSQL Backups
 
 Herramienta para automatizar la restauración de backups (.bak) en SQL Server.
 
