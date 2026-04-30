@@ -14,7 +14,7 @@ def ask_config() -> tuple[DbConfigComplete, ...] | tuple[DbConfig, ContainerConf
     db_option = int_try_parse(
         input(
             style_bright(
-                "En que entorno esta la base de datos? (1: contenedor local, 2: instancia local): "
+                "En que entorno esta la base de datos? \n(1: contenedor local, 2: instancia local): "
             )
         )
     )
