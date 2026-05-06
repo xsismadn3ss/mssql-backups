@@ -21,7 +21,7 @@ from mssql_backups.utils.colors import (
 from mssql_backups.utils.sql import build_restore_query, execute_sql_command
 
 
-def run_app():
+def restore_app():
     click.clear()
     config = ask_config()
     # Obtener archivos
