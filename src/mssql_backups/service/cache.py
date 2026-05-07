@@ -14,7 +14,7 @@ def init():
         db_path = get_db_path()
         engine = get_engine()
         create_tables(engine)
-        console.print(f"[cyan]Cache creado en {db_path}[/]")
+        console.print(f"[cyan]Cache creado en[/] [dim]{db_path}[/]")
 
 
 @app.command()
