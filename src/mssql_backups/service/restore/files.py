@@ -21,19 +21,20 @@ def files(
 
     backup_name = required_text(bak, "Nombre de la configuración de backup")
 
-    with session_scope() as session:
-        backup = get_backup(session, backup_name)
+    with console.status("Cargando..."):
+        with session_scope() as session:
+            backup = get_backup(session, backup_name)
 
-        if backup is None:
-            console.print(
-                f"[red]No existe una configuración de backup llamada {backup_name}[/]"
-            )
-            raise typer.Exit(code=1)
+            if backup is None:
+                console.print(
+                    f"[red]No existe una configuración de backup llamada {backup_name}[/]"
+                )
+                raise typer.Exit(code=1)
 
-    try:
-        files = list_backup_files(backup)
-    except FileNotFoundError as error:
-        console.print(f"[red]{error}[/]")
-        raise typer.Exit(code=1) from error
+        try:
+            files = list_backup_files(backup)
+        except FileNotFoundError as error:
+            console.print(f"[red]{error}[/]")
+            raise typer.Exit(code=1) from error
 
-    print_files(files)
+        print_files(files)

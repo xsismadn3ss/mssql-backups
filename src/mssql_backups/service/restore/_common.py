@@ -6,6 +6,7 @@ from sqlmodel import Session, select
 
 from mssql_backups.models.models import BackupConfig, DbConfig
 from mssql_backups.models.tables import Backup, Connection
+from mssql_backups.utils.container import list_container_files
 
 from .._common import console
 
@@ -37,6 +38,12 @@ def build_backup_config(backup: Backup) -> BackupConfig:
 
 
 def list_backup_files(backup: Backup) -> list[str]:
+    if backup.is_container:
+        result = list_container_files(backup)
+        if not result:
+            return []
+        return result.splitlines()
+
     backup_dir = Path(backup.backup_dir).expanduser()
     if not backup_dir.exists():
         raise FileNotFoundError(f"No existe la carpeta de backups: {backup.backup_dir}")
