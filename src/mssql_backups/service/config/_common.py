@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 
 import typer
@@ -13,7 +14,7 @@ console = Console()
 
 
 @contextmanager
-def session_scope() -> Session:
+def session_scope() -> Iterator[Session]:
     engine = get_engine()
     create_tables(engine)
     with Session(engine) as session:
