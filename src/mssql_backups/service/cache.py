@@ -23,6 +23,12 @@ def clean():
     db_path = get_db_path()
     if db_path.exists():
         db_path.unlink()
+    else:
+        console = Console()
+        console.print(
+            f"[red]No se encontró el archivo de cache en[/] [dim]{db_path}[/]"
+        )
+        raise typer.Exit(1)
     if base_dir.exists():
         base_dir.rmdir()
     console = Console()
