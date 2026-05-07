@@ -21,9 +21,9 @@ def print_connections(connections: list[Connection]) -> None:
 
 
 def print_backups(backups: list[Backup]) -> None:
-    console.print("[bold cyan]Backups guardados[/]")
+    console.print("[bold cyan]Configuraciones de backups guardados[/]")
     if not backups:
-        print_empty("No hay backups guardados")
+        print_empty("No datos guardados")
         return
 
     for backup in backups:
