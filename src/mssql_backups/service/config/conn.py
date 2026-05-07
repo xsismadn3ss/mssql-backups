@@ -4,8 +4,12 @@ import typer
 from sqlmodel import select
 
 from mssql_backups.models.tables import Connection
-
-from ._common import console, required_int, required_text, session_scope
+from mssql_backups.service._common import (
+    console,
+    required_int,
+    required_text,
+    session_scope,
+)
 
 app = typer.Typer(help="Administrar conexiones guardadas")
 

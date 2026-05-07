@@ -1,41 +1,13 @@
 from __future__ import annotations
 
-from collections.abc import Generator
-from contextlib import contextmanager
 from pathlib import Path
 
-import typer
-from rich.console import Console
 from sqlmodel import Session, select
 
 from mssql_backups.models.models import BackupConfig, DbConfig
 from mssql_backups.models.tables import Backup, Connection
-from mssql_backups.utils.local import create_tables, get_engine
 
-console = Console()
-
-
-@contextmanager
-def session_scope() -> Generator[Session, None, None]:
-    engine = get_engine()
-    create_tables(engine)
-    with Session(engine) as session:
-        yield session
-
-
-def required_text(value: str | None, prompt_text: str) -> str:
-    candidate = value
-
-    while True:
-        if candidate is None:
-            candidate = typer.prompt(prompt_text)
-
-        candidate = candidate.strip()
-        if candidate:
-            return candidate
-
-        console.print("[red]El valor no puede estar vacío[/]")
-        candidate = None
+from .._common import console
 
 
 def get_connection(session: Session, name: str) -> Connection | None:

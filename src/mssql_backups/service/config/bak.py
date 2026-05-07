@@ -4,15 +4,15 @@ import typer
 from sqlmodel import select
 
 from mssql_backups.models.tables import Backup
-
-from ._common import (
+from mssql_backups.service._common import (
     console,
     optional_text,
-    print_backups,
     required_bool,
     required_text,
     session_scope,
 )
+
+from ._common import print_backups
 
 app = typer.Typer(help="Administrar backups guardados")
 
