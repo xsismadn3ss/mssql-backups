@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from rich.table import Table
+
 from mssql_backups.models.tables import Backup, Connection
 from mssql_backups.service._common import console
 
@@ -9,23 +11,31 @@ def print_empty(message: str) -> None:
 
 
 def print_connections(connections: list[Connection]) -> None:
-    console.print("[bold cyan]Conexiones guardadas[/]")
     if not connections:
         print_empty("No hay conexiones guardadas")
         return
 
+    table = Table(title="Lista de conexiones")
+    table.add_column("Nombre", justify="left")
+    table.add_column("host", justify="left")
+    table.add_column("port", justify="left")
+    table.add_column("username", justify="left")
+
     for connection in connections:
-        console.print(
-            f"- {connection.name} | host={connection.host} | port={connection.port} | username={connection.username}"
+        table.add_row(
+            f"[magenta]{connection.name}[/]",
+            f"{connection.host}",
+            f"[cyan]{connection.port}[/]",
+            f"[green]{connection.username}[/]",
         )
+
+    console.print(table)
 
 
 def print_backups(backups: list[Backup]) -> None:
     if not backups:
         print_empty("No datos guardados")
         return
-
-    from rich.table import Table
 
     table = Table(title="Lista de backups")
     table.add_column("Nombre", justify="left")
