@@ -19,6 +19,33 @@ uv tool install mssql-backups
 uv tool run mssql-backups
 ```
 
+## Configuración guardada
+
+La configuración de conexiones y backups se guarda en SQLite en `~/.mssql-bakups/config.db`.
+
+```bash
+mssql-backups config bak ls
+mssql-backups config bak addbak
+mssql-backups config bak rm --name mi-backup
+
+mssql-backups config conn ls
+mssql-backups config conn add
+mssql-backups config conn rm --name mi-conexion
+```
+
+Si no pasas alguno de los parámetros en `add` o `add`, el comando te los preguntará uno por uno de forma interactiva.
+
+## Restauración guardada
+
+La restauración usa la conexión y la configuración de backup guardadas en SQLite.
+
+```bash
+mssql-backups restore files mi-backup
+mssql-backups restore begin --conn mi-conexion --bak mi-backup
+```
+
+Si no pasas `conn` o `bak` en `begin`, el comando te los pedirá en tiempo de ejecución.
+
 
 ## Requisitos
 
