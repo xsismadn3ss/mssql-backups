@@ -9,10 +9,10 @@ description = "Aplicación de consola para restuarar base de datos en SQL Server
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "click>=8.3.3",
-    "colorama>=0.4.6",
     "docker>=7.1.0",
     "pydantic>=2.13.3",
+    "sqlmodel>=0.0.38",
+    "typer>=0.25.1",
 ]
 
 [project.scripts]
