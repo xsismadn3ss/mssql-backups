@@ -17,6 +17,6 @@ def get_engine():
 
 
 def create_tables(engine):
-    from mssql_backups.models import tables
+    from mssql_backups.models import tables  # noqa: F401
 
     SQLModel.metadata.create_all(engine)
