@@ -1,8 +1,10 @@
+import uuid
+
 from sqlmodel import Field, SQLModel
 
 
 class Connection(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     name: str = Field(unique=True, index=True)
     host: str
     port: int
@@ -11,7 +13,7 @@ class Connection(SQLModel, table=True):
 
 
 class Backup(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
     name: str = Field(unique=True, index=True)
     description: str | None = Field(default=None, nullable=True)
     backup_dir: str = Field()
