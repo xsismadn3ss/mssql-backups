@@ -3,7 +3,7 @@ from __future__ import annotations
 import typer
 from sqlmodel import select
 
-from mssql_backups.models.tables import Backup
+from mssql_backups.models.tables import Backup, Connection
 from mssql_backups.service._common import (
     console,
     optional_text,
@@ -23,12 +23,12 @@ def ls() -> None:
         with session_scope() as session:
             statement = select(Backup).order_by(Backup.name)
             backups = list(session.exec(statement).all())
-
-        print_backups(backups)
+            print_backups(backups)
 
 
 @app.command()
 def add(
+    conn: str | None = typer.Option(None, "--conn", help="Nombre de la conexión"),
     name: str | None = typer.Option(None, "--name", help="Nombre del backup"),
     description: str | None = typer.Option(
         None, "--description", help="Descripción del backup"
@@ -46,6 +46,7 @@ def add(
         None, "--container-name", help="Nombre del contenedor"
     ),
 ) -> None:
+    conn = required_text(conn, "Nombre de la conexión")
     backup_name = required_text(name, "Nombre del backup")
     backup_description = optional_text(description, "Descripción del backup")
     backup_directory = required_text(backup_dir, "Directorio de backups")
@@ -59,6 +60,13 @@ def add(
 
     with console.status("Guardando configuración"):
         with session_scope() as session:
+            connection = session.exec(
+                select(Connection).where(Connection.name == conn)
+            ).first()
+            if connection is None:
+                console.print(f"[red]No existe una conexión llamada {conn}[/]")
+                raise typer.Exit(code=1)
+
             existing = session.exec(
                 select(Backup).where(Backup.name == backup_name)
             ).first()
@@ -73,6 +81,7 @@ def add(
                 data_dir=data_directory,
                 is_container=container_flag,
                 container_name=container_name_value,
+                conn=connection,
             )
             session.add(backup)
             session.commit()

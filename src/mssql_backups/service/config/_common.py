@@ -21,16 +21,28 @@ def print_connections(connections: list[Connection]) -> None:
 
 
 def print_backups(backups: list[Backup]) -> None:
-    console.print("[bold cyan]Configuraciones de backups guardados[/]")
     if not backups:
         print_empty("No datos guardados")
         return
 
+    from rich.table import Table
+
+    table = Table(title="Lista de backups")
+    table.add_column("Nombre", justify="left")
+    table.add_column("Conexión", justify="left")
+    table.add_column("Descripción", justify="left")
+    table.add_column("backup_dir", justify="left")
+    table.add_column("data_dir", justify="left")
+    table.add_column("contenedor", justify="left")
+
     for backup in backups:
-        description = (
-            f" | description={backup.description}" if backup.description else ""
+        table.add_row(
+            f"[magenta]{backup.name}[/]",
+            f"[magenta]{backup.conn.name}[/]" if backup.conn else "",
+            backup.description or "",
+            f"[cyan]{backup.backup_dir}[/]",
+            f"[cyan]{backup.data_dir}[/]",
+            f"[blue]{backup.container_name}[/]" or "",
         )
-        container = "si" if backup.is_container else "no"
-        console.print(
-            f"- {backup.name}{description} | backup_dir={backup.backup_dir} | data_dir={backup.data_dir} | is_container={container} | container_name={backup.container_name}"
-        )
+
+    console.print(table)
