@@ -25,7 +25,7 @@ La configuración de conexiones y backups se guarda en SQLite en `~/.mssql-bakup
 
 ```bash
 mssql-backups config bak ls
-mssql-backups config bak addbak
+mssql-backups config bak add
 mssql-backups config bak rm --name mi-backup
 
 mssql-backups config conn ls
