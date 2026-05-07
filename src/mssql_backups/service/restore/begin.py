@@ -1,18 +1,19 @@
 from __future__ import annotations
 
 from pathlib import Path
+from time import time
 
 import typer
 
 from mssql_backups.service._common import required_text, session_scope
-from mssql_backups.utils.sql import build_restore_query, execute_sql_command
+from mssql_backups.utils.mssql import engine
 
 from ._common import (
-    build_backup_config,
-    build_db_config,
+    build_restore_query,
     console,
     get_backup,
     get_connection,
+    get_logical_names_from_backup,
     list_backup_files,
 )
 
@@ -40,9 +41,6 @@ def begin(
             )
             raise typer.Exit(code=1)
 
-        db_config = build_db_config(connection)
-        backup_config = build_backup_config(backup)
-
     try:
         files = list_backup_files(backup)
     except FileNotFoundError as error:
@@ -53,22 +51,54 @@ def begin(
         console.print("[yellow]No se encontraron archivos de backups[/]")
         return
 
-    console.print("[bold green]Archivos de backups encontrados:[/]")
-    for file_name in files:
-        console.print(f"[green]{file_name}[/]")
-
-    for file_name in files:
-        backup_path = str(Path(backup_config.backup_dir) / file_name)
-        db_name = Path(file_name).stem
-        query = build_restore_query(
-            db_config, backup_path, backup_config.data_dir, db_name
+    with console.status("...") as status:
+        str_files = ""
+        for file in files:
+            str_files += f"{file}\n"
+        status.update(
+            f"[bold green]Archivos de backups encontrados:[/] [dim]\n{str_files}[/]"
         )
 
-        console.print(f"\nRestaurando {file_name}")
-        console.print(f"[cyan]{query}[/]")
+        mssql_engine = engine(connection)
 
-        result = execute_sql_command(db_config, query)
-        console.print(f"[dim green]{result}[/]")
+        start_time = time()
+        i = 1
+        restored_dbs = []
+        for file in files:
+            status.update(f"Restaurando backup... [bold cyan]{i}/{len(files)}[/]")
+            backup_path = f"{backup.backup_dir}/{file}"
+            db_name = Path(file).stem
 
-    console.print("[bold green]\nRestauración completada[/]")
-    console.print(f"[green]Se restauraron {len(files)} bases de datos[/]")
+            logical_names = get_logical_names_from_backup(mssql_engine, backup_path)
+            query = build_restore_query(
+                backup_path, backup.data_dir, db_name, *logical_names
+            )
+
+            with console.status(
+                f"[cyan]Resturando[/] {db_name} \n[dim magenta]Ejecutando:[/][dim]\n{query}[/]"
+            ):
+                with mssql_engine.connect().execution_options(
+                    isolation_level="AUTOCOMMIT"
+                ) as mssql_connection:
+                    mssql_connection.exec_driver_sql(query)
+
+            # verificar si se restuaro correctamente
+            with mssql_engine.connect() as mssql_conn:
+                verify = mssql_conn.exec_driver_sql(
+                    "SELECT state_desc FROM sys.databases WHERE name = ?",
+                    (db_name,),
+                ).first()
+                if verify:
+                    console.print(f"[dim green]{db_name}")
+                    restored_dbs.append(db_name)
+                else:
+                    console.print(f"[dim red]{f'{db_name}'.rjust(10)}")
+            i += 1
+
+    total = len(restored_dbs)
+    console.print(
+        f"\n[bold green]Restauración completada.[/] \nSe restauraron {total}/{len(files)} bases de datos."
+    )
+    elapsed = time() - start_time
+    elapsed_min = elapsed / 60
+    console.print(f"Tiempo total: {elapsed:.2f}s ({elapsed_min:.2f}m)")
