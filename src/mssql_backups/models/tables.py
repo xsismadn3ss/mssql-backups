@@ -17,3 +17,4 @@ class Backup(SQLModel, table=True):
     backup_dir: str = Field()
     data_dir: str = Field()
     is_container: bool = Field(default=False)
+    container_name: str | None = Field(default=None, nullable=True)
