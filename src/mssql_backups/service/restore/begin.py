@@ -5,60 +5,71 @@ from time import time
 
 import typer
 
-from mssql_backups.service._common import required_text, session_scope
-from mssql_backups.utils.mssql import engine
-
-from ._common import (
-    build_restore_query,
-    console,
-    get_backup,
-    get_connection,
-    get_logical_names_from_backup,
-    list_backup_files,
+from mssql_backups.repository import (
+    bak_repository,
+    conn_repository,
+    container_repository,
+    local_file_repository,
+    mssql_repository,
 )
+from mssql_backups.service._common import console, session_scope
+from mssql_backups.utils.mssql import engine
 
 
 def begin(
-    conn: str | None = typer.Option(None, help="Nombre de la conexión guardada"),
-    bak: str | None = typer.Option(None, help="Nombre de la configuración de backup"),
+    conn: str = typer.Option(
+        None,
+        "--conn",
+        "-c",
+        help="Nombre de la conexión guardada",
+        prompt=True,
+        prompt_required=True,
+    ),
+    bak: str = typer.Option(
+        None,
+        "--bak",
+        "-b",
+        help="Nombre de la configuración de backup",
+        prompt=True,
+        prompt_required=True,
+    ),
 ) -> None:
     """
     Inicia la restauración de una configuración de backup
     """
-    connection_name = required_text(conn, "Nombre de la conexión")
-    backup_name = required_text(bak, "Nombre de la configuración de backup")
 
+    # Validar que la conexión y que la configuración de backup existan
     with session_scope() as session:
-        connection = get_connection(session, connection_name)
+        connection = conn_repository.get(session, conn)
         if connection is None:
-            console.print(f"[red]No existe una conexión llamada {connection_name}[/]")
+            console.print(f"[red]No existe una conexión llamada {conn}[/]")
             raise typer.Exit(code=1)
 
-        backup = get_backup(session, backup_name)
+        backup = bak_repository._get_bak(session, connection.id, bak)
         if backup is None:
             console.print(
-                f"[red]No existe una configuración de backup llamada {backup_name}[/]"
+                f"[red]No existe una configuración de backup llamada [bold]{bak}[/] para la conexión [bold]{conn}[/][/]"
             )
             raise typer.Exit(code=1)
 
-    try:
-        files = list_backup_files(backup)
-    except FileNotFoundError as error:
-        console.print(f"[red]{error}[/]")
-        raise typer.Exit(code=1) from error
+    # Obtener archivos
+    if backup.is_container:
+        files = container_repository.list_files(backup, "backup_dir")
+    else:
+        files = local_file_repository.list_files(backup.backup_dir)
 
     if not files:
         console.print("[yellow]No se encontraron archivos de backups[/]")
         return
 
-    with console.status("...") as status:
-        str_files = ""
-        for file in files:
-            str_files += f"{file}\n"
-        status.update(
-            f"[bold green]Archivos de backups encontrados:[/] [dim]\n{str_files}[/]"
-        )
+    str_files = ""
+    for file in files:
+        str_files += f"{file}\n"
+    console.print(
+        f"[bold green]Archivos de backups encontrados:[/] [dim]\n{str_files}[/]"
+    )
 
+    with console.status("...") as status:
         mssql_engine = engine(connection)
 
         start_time = time()
@@ -69,20 +80,16 @@ def begin(
             backup_path = f"{backup.backup_dir}/{file}"
             db_name = Path(file).stem
 
-            logical_names = get_logical_names_from_backup(mssql_engine, backup_path)
-            query = build_restore_query(
-                backup_path, backup.data_dir, db_name, *logical_names
+            logical_names = mssql_repository.get_logical_names(
+                mssql_engine, backup_path
             )
 
-            with console.status(
-                f"[cyan]Resturando[/] {db_name} \n[dim magenta]Ejecutando:[/][dim]\n{query}[/]"
-            ):
-                with mssql_engine.connect().execution_options(
-                    isolation_level="AUTOCOMMIT"
-                ) as mssql_connection:
-                    mssql_connection.exec_driver_sql(query)
+            with console.status(f"[cyan]Resturando[/] {db_name}"):
+                mssql_repository.restore_db(
+                    mssql_engine, backup_path, backup.data_dir, db_name, *logical_names
+                )
 
-            # verificar si se restuaro correctamente
+            # verificar si se restauro correctamente
             with mssql_engine.connect() as mssql_conn:
                 verify = mssql_conn.exec_driver_sql(
                     "SELECT state_desc FROM sys.databases WHERE name = ?",

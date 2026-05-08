@@ -2,39 +2,58 @@ from __future__ import annotations
 
 import typer
 
-from mssql_backups.service._common import required_text, session_scope
-
-from ._common import (
-    console,
-    get_backup,
-    list_backup_files,
-    print_files,
+from mssql_backups.repository import (
+    bak_repository,
+    container_repository,
+    local_file_repository,
 )
+from mssql_backups.service._common import console, required_text, session_scope
 
 
 def files(
-    bak: str | None = typer.Argument(None, help="Nombre de la configuración de backup"),
+    conn: str = typer.Option(None, "--conn", "-c", help="Nombre de la conexión"),
+    bak: str | None = typer.Option(
+        None, "--bak", "-b", help="Nombre de la configuración de backup"
+    ),
 ) -> None:
     """
     Lista los archivos de backup disponibles
     """
 
-    backup_name = required_text(bak, "Nombre de la configuración de backup")
+    conn = required_text(conn, "Nombre de la conexión")
+    bak = required_text(bak, "Nombre de la configuración de backup")
 
     with console.status("Cargando..."):
         with session_scope() as session:
-            backup = get_backup(session, backup_name)
+            backup = bak_repository.get(session, conn, bak)
 
             if backup is None:
                 console.print(
-                    f"[red]No existe una configuración de backup llamada {backup_name}[/]"
+                    f"[red]No existe una configuración de backup llamada {bak} para la conexión {conn}[/]"
                 )
                 raise typer.Exit(code=1)
 
-        try:
-            files = list_backup_files(backup)
-        except FileNotFoundError as error:
-            console.print(f"[red]{error}[/]")
-            raise typer.Exit(code=1) from error
+        if backup.is_container:
+            files = container_repository.list_files(backup, "backup_dir")
+        else:
+            files = local_file_repository.list_files(backup.backup_dir)
 
-        print_files(files)
+        if not files:
+            console.print(
+                f"[red]No se encontraron archivos de backup para la configuración {bak}[/]"
+            )
+            raise typer.Exit(code=1)
+
+        baks = [f for f in files if f.endswith(".bak")]
+        not_baks = [f for f in files if not f.endswith(".bak")]
+
+        console.print("Archivos encontrados:")
+        if baks:
+            console.print(f"[green]{len(baks)} archivos .bak encontrados[/]")
+            console.print(f"[blue]{baks}[/]")
+        if not_baks:
+            console.print(f"\n[yellow]{len(not_baks)} archivos no .bak encontrados[/]")
+            console.print(f"[magenta]{not_baks}[/]")
+            console.print(
+                "[dim]Considera eliminar los archivos no .bak para evitar conflictos[/]"
+            )

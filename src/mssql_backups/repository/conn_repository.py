@@ -13,6 +13,10 @@ def _get(session: Session, name: str):
     ).one_or_none()
 
 
+def get(session: Session, name: str):
+    return session.exec(select(Connection).where(Connection.name == name)).first()
+
+
 def add(session: Session, connection: Connection):
     if _get(session, connection.name):
         return

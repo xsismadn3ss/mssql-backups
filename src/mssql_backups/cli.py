@@ -14,6 +14,7 @@ app = typer.Typer(
 app.add_typer(service.config, name="config")
 app.add_typer(service.restore, name="restore")
 app.add_typer(service.cache, name="cache")
+app.add_typer(service.db, name="db")
 
 
 def main():

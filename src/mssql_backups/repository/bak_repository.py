@@ -15,6 +15,14 @@ def _get_bak(session: Session, conn_id, name: str) -> Optional[Backup]:
     ).one_or_none()
 
 
+def get(session: Session, conn: str, name: str) -> Optional[Backup]:
+    connection = _get_conn(session, conn)
+    if connection is None:
+        return None
+
+    return _get_bak(session, connection.id, name)
+
+
 def ls(session: Session, conn: Optional[str]) -> list[Backup]:
     if conn is None:
         return list(session.exec(select(Backup).order_by(Backup.name)).all())
