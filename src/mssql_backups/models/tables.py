@@ -1,6 +1,7 @@
 import uuid
 from typing import List, Optional
 
+from sqlalchemy import UniqueConstraint
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -17,8 +18,10 @@ class Connection(SQLModel, table=True):
 
 
 class Backup(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint("conn_id", "name"),)
+
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-    name: str = Field(unique=True, index=True)
+    name: str = Field(index=True)
     description: str | None = Field(default=None, nullable=True)
     backup_dir: str = Field()
     data_dir: str = Field()
@@ -26,12 +29,14 @@ class Backup(SQLModel, table=True):
     container_name: str | None = Field(default=None, nullable=True)
 
     conn_id: Optional[uuid.UUID] = Field(foreign_key="connection.id", default=None)
-    conn: Optional[Connection] = Relationship(back_populates="backups")
+    conn: Connection = Relationship(back_populates="backups")
 
 
 class DbName(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint("conn_id", "name"),)
+
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True)
-    name: str = Field(unique=True, index=True)
+    name: str = Field(index=True)
 
     conn_id: Optional[uuid.UUID] = Field(foreign_key="connection.id", default=None)
-    conn: Optional[Connection] = Relationship(back_populates="db_names")
+    conn: Connection = Relationship(back_populates="db_names")
