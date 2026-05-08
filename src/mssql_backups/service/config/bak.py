@@ -26,10 +26,10 @@ def ls(
             backups = repository.ls(session, conn)
 
             if not backups:
-                console.print("[red]No se encontraron resultados[/]")
-                raise typer.Exit(code=1)
+                console.print("[yellow]No hay configuración de backups guardados[/]")
+                return
 
-            table = Table(title="Lista de backups")
+            table = Table(title="Configuraciones de backups")
             table.add_column("Nombre", justify="left")
             table.add_column("Conexión", justify="left")
             table.add_column("Descripción", justify="left")

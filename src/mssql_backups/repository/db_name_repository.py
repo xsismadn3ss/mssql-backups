@@ -3,105 +3,114 @@ from typing import List, Optional
 
 from sqlmodel import Session, select
 
-from mssql_backups.models.tables import Connection, DbName
+from mssql_backups.models.tables import Backup, DbName
 
 
-def _get_conn_id(session: Session, conn: str) -> Optional[uuid.UUID]:
+def _get_bak(session: Session, bak: str) -> Optional[Backup]:
+    return session.exec(select(Backup).where(Backup.name == bak)).one_or_none()
+
+
+def _get_db_name(session: Session, backup_id: uuid.UUID, name: str) -> Optional[DbName]:
     return session.exec(
-        select(Connection.id).where(Connection.name == conn)
+        select(DbName).where(DbName.backup_id == backup_id).where(DbName.name == name)
     ).one_or_none()
 
 
-def _get_db_name(session: Session, conn_id: uuid.UUID, name: str) -> Optional[str]:
-    return session.exec(
-        select(DbName.name).where(DbName.conn_id == conn_id).where(DbName.name == name)
-    ).one_or_none()
+def ls(session: Session, bak: Optional[str]) -> list[DbName]:
+    if bak is None:
+        return list(session.exec(select(DbName).order_by(DbName.name)).all())
 
-
-def list(session: Session, conn: Optional[str]):
-    if conn is None:
-        return session.exec(select(DbName)).fetchall()
-
-    conn_id = _get_conn_id(session, conn)
-
-    if conn_id is None:
+    backup = _get_bak(session, bak)
+    if backup is None:
         return []
-    statement = select(DbName).where(DbName.conn_id == conn_id)
-    return session.exec(statement).fetchall()
+
+    return list(
+        session.exec(
+            select(DbName).where(DbName.backup_id == backup.id).order_by(DbName.name)
+        ).all()
+    )
 
 
-def add(session: Session, conn: str, name: str):
-    conn_id = session.exec(
-        select(Connection.id).where(Connection.name == conn)
-    ).one_or_none()
-
-    if conn_id is None:
+def add(session: Session, bak: str, name: str) -> bool:
+    backup = _get_bak(session, bak)
+    if backup is None:
         return False
 
-    if _get_db_name(session, conn_id, name) is not None:
+    if _get_db_name(session, backup.id, name) is not None:
         return False
-    db_name = DbName(name=name, conn_id=conn_id)
+
+    db_name = DbName(name=name, backup_id=backup.id)
     session.add(db_name)
     session.commit()
+    return True
 
 
-def add_all(session: Session, conn: str, names: List[str]):
-    conn_id = session.exec(
-        select(Connection.id).where(Connection.name == conn)
-    ).one_or_none()
+def add_all(session: Session, bak: str, names: List[str]):
+    backup = _get_bak(session, bak)
 
     omitidos: List[str] = []
     agregados: List[str] = []
 
-    if conn_id is None:
+    if backup is None:
         return [], []
 
+    seen: set[str] = set()
     for name in names:
-        exists = _get_db_name(session, conn_id, name) is not None
+        if name in seen:
+            omitidos.append(name)
+            continue
+        seen.add(name)
+
+        exists = _get_db_name(session, backup.id, name) is not None
         if exists:
             omitidos.append(name)
         else:
-            db_name = DbName(name=name, conn_id=conn_id)
+            db_name = DbName(name=name, backup_id=backup.id)
             session.add(db_name)
             agregados.append(name)
-    if len(agregados) > 0:
+
+    if agregados:
         session.commit()
     return agregados, omitidos
 
 
-def remove(session: Session, name: str, conn: str):
-    conn_id = _get_conn_id(session, conn)
-
-    if conn_id is None:
+def remove(session: Session, bak: str, name: str) -> bool:
+    backup = _get_bak(session, bak)
+    if backup is None:
         return False
 
-    db_name = _get_db_name(session, conn_id, name)
-
+    db_name = _get_db_name(session, backup.id, name)
     if db_name is None:
         return False
+
     session.delete(db_name)
     session.commit()
     return True
 
 
-def remove_all(session: Session, conn: str, names: List[str]):
-    conn_id = _get_conn_id(session, conn)
+def remove_all(session: Session, bak: str, names: List[str]):
+    backup = _get_bak(session, bak)
 
-    if conn_id is None:
+    if backup is None:
         return [], []
 
     omitidos: List[str] = []
     eliminados: List[str] = []
+    seen: set[str] = set()
 
     for name in names:
-        db = session.exec(
-            select(DbName).where(DbName.conn_id == conn_id and DbName.name == name)
-        ).first()
-        if not db:
+        if name in seen:
+            omitidos.append(name)
+            continue
+        seen.add(name)
+
+        db = _get_db_name(session, backup.id, name)
+        if db is None:
             omitidos.append(name)
         else:
             session.delete(db)
             eliminados.append(name)
-    if len(eliminados) > 0:
+
+    if eliminados:
         session.commit()
     return omitidos, eliminados

@@ -21,7 +21,10 @@ def status():
     """
     from .bak import ls as bak_ls
     from .conn import ls as conn_ls
+    from .db import ls as db_ls
 
     conn_ls()
     print()
-    bak_ls()
+    bak_ls(conn=None)
+    print()
+    db_ls(bak=None)
