@@ -10,7 +10,6 @@ app = typer.Typer(help="Realizar pruebas rapidas de la conexion a la base de dat
 @app.command()
 def test(
     conn: str = RequiredOption(
-        ...,
         "--conn",
         "-c",
         help="nombre de la conexion",
@@ -41,7 +40,6 @@ def test(
 @app.command()
 def ls(
     conn: str = RequiredOption(
-        ...,
         "--conn",
         "-c",
         help="nombre de la conexion",

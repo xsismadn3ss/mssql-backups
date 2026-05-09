@@ -53,31 +53,26 @@ def ls(
 @app.command()
 def add(
     conn: str = RequiredOption(
-        ...,
         "--conn",
         "-c",
         help="Nombre de la conexión",
     ),
     bak: str = RequiredOption(
-        ...,
         "--name",
         "-n",
         help="Nombre del backup",
     ),
     description: str = RequiredOption(
-        ...,
         "--description",
         "-d",
         help="Descripción del backup",
     ),
     backup_dir: str = RequiredOption(
-        ...,
         "--backup-dir",
         "-bdir",
         help="Directorio de backups",
     ),
     data_dir: str = RequiredOption(
-        ...,
         "--data-dir",
         "-ddir",
         help="Directorio de datos",
@@ -129,8 +124,8 @@ def add(
 
 @app.command()
 def rm(
-    conn: str = RequiredOption(..., "--conn", "-c", help="Nombre de la conexión"),
-    bak: str = RequiredOption(..., "--bak", "-b", help="Nombre del backup a eliminar"),
+    conn: str = RequiredOption("--conn", "-c", help="Nombre de la conexión"),
+    bak: str = RequiredOption("--bak", "-b", help="Nombre del backup a eliminar"),
 ) -> None:
 
     with console.status("Eliminando backup..."):

@@ -12,13 +12,11 @@ from mssql_backups.service._common import RequiredOption, console, session_scope
 
 def files(
     conn: str = RequiredOption(
-        ...,
         "--conn",
         "-c",
         help="Nombre de la conexión",
     ),
     bak: str = RequiredOption(
-        ...,
         "--bak",
         "-b",
         help="Nombre de la configuración de backup",

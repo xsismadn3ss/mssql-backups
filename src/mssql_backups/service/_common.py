@@ -20,9 +20,8 @@ def session_scope() -> Generator[Session, None, None]:
         yield session
 
 
-def RequiredOption(default, *params_decls, help: str):
+def RequiredOption(*params_decls, default=..., help: str):
     return typer.Option(
-        default=default,
         *params_decls,
         help=help,
         prompt=True,
