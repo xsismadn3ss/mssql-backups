@@ -7,21 +7,26 @@ from mssql_backups.repository import (
     container_repository,
     local_file_repository,
 )
-from mssql_backups.service._common import console, required_text, session_scope
+from mssql_backups.service._common import RequiredOption, console, session_scope
 
 
 def files(
-    conn: str = typer.Option(None, "--conn", "-c", help="Nombre de la conexión"),
-    bak: str | None = typer.Option(
-        None, "--bak", "-b", help="Nombre de la configuración de backup"
+    conn: str = RequiredOption(
+        ...,
+        "--conn",
+        "-c",
+        help="Nombre de la conexión",
+    ),
+    bak: str = RequiredOption(
+        ...,
+        "--bak",
+        "-b",
+        help="Nombre de la configuración de backup",
     ),
 ) -> None:
     """
     Lista los archivos de backup disponibles
     """
-
-    conn = required_text(conn, "Nombre de la conexión")
-    bak = required_text(bak, "Nombre de la configuración de backup")
 
     with console.status("Cargando..."):
         with session_scope() as session:

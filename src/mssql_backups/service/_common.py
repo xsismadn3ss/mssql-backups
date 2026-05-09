@@ -20,6 +20,16 @@ def session_scope() -> Generator[Session, None, None]:
         yield session
 
 
+def RequiredOption(default, *params_decls, help: str):
+    return typer.Option(
+        default=default,
+        *params_decls,
+        help=help,
+        prompt=True,
+        prompt_required=True,
+    )
+
+
 def required_text(
     value: str | None, prompt_text: str, *, hide_input: bool = False
 ) -> str:
