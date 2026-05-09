@@ -1,7 +1,7 @@
 import typer
 
 from mssql_backups.repository import conn_repository, mssql_repository
-from mssql_backups.service._common import console, session_scope
+from mssql_backups.service._common import RequiredOption, console, session_scope
 from mssql_backups.utils.mssql import engine
 
 app = typer.Typer(help="Realizar pruebas rapidas de la conexion a la base de datos")
@@ -9,13 +9,11 @@ app = typer.Typer(help="Realizar pruebas rapidas de la conexion a la base de dat
 
 @app.command()
 def test(
-    conn: str = typer.Option(
+    conn: str = RequiredOption(
         ...,
         "--conn",
         "-c",
-        prompt_required=True,
         help="nombre de la conexion",
-        prompt=True,
     ),
 ):
     """Validar conexion de la base de datos"""
@@ -42,13 +40,11 @@ def test(
 
 @app.command()
 def ls(
-    conn: str = typer.Option(
+    conn: str = RequiredOption(
         ...,
         "--conn",
         "-c",
-        prompt_required=True,
         help="nombre de la conexion",
-        prompt=True,
     ),
 ):
     """Listar las bases de datos para la conexion seleccionada"""
