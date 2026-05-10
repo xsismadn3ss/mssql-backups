@@ -32,3 +32,16 @@ def list_files(config: Backup, dir: Literal["backup_dir", "data_dir"]):
         return text.splitlines()
     except Exception as e:
         print(f"Error al listar archivos en el contenedor: {e}")
+
+
+def create_dir(config: Backup, path: str):
+    container: Container = get_container(config)
+    try:
+        exec_result = container.exec_run(f"mkdir -p {path}")
+        if exec_result.exit_code != 0:
+            print(f"Error al crear directorio en el contenedor: {exec_result.output}")
+            return False
+        return True
+    except Exception as e:
+        print(f"Error al crear directorio en el contenedor: {e}")
+        return False

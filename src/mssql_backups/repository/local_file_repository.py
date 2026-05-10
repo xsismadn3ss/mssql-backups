@@ -8,3 +8,8 @@ def list_files(path: str) -> List[str]:
         return []
 
     return sorted(path.name for path in dir.iterdir())
+
+
+def create_dir(path: str) -> None:
+    dir = Path(path).expanduser()
+    dir.mkdir(parents=True, exist_ok=True)

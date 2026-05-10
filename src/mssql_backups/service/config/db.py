@@ -1,8 +1,13 @@
 import typer
 from rich.table import Table
 
+from mssql_backups.repository import bak_repository
 from mssql_backups.repository import db_name_repository as repository
-from mssql_backups.service._common import console, required_text, session_scope
+from mssql_backups.service._common import (
+    console,
+    required_text,
+    session_scope,
+)
 
 app = typer.Typer(
     help="Manajear nombres de bases de datos relacionados con configuraciones de backup"
@@ -37,20 +42,44 @@ def ls(
             table.add_column("Backup")
             for db_name in db_names:
                 backup_name = db_name.backup.name if db_name.backup else "-"
-                table.add_row(f"[green]{db_name.name}[/]", f"[blue]{backup_name}[/]")
+                conn_name = (
+                    db_name.backup.conn.name
+                    if db_name.backup and db_name.backup.conn
+                    else "-"
+                )
+                table.add_row(
+                    f"[green]{db_name.name}[/]", f"[blue]{backup_name} | {conn_name}[/]"
+                )
             console.print(table)
 
 
 @app.command()
 def add(
     bak: str = typer.Option(
-        ..., "--bak", "--backup", "-b", help="nombre de la configuracion de backup"
+        ...,
+        "--bak",
+        "--backup",
+        "-b",
+        help="nombre de la configuracion de backup",
+        prompt=True,
+        prompt_required=True,
+    ),
+    conn: str = typer.Option(
+        ...,
+        "--conn",
+        "--connection",
+        "-c",
+        help="nombre de la conexion",
+        prompt=True,
+        prompt_required=True,
     ),
     name: str = typer.Option(
         ...,
         "--name",
         "-n",
         help="nombre de la base de datos, tambien puede ser una lista de nombres separados por comas",
+        prompt=True,
+        prompt_required=True,
     ),
 ):
     """
@@ -58,12 +87,17 @@ def add(
 
     Tambien se pueden guardar multiples nombres de base de datos separados por comas
     """
-    bak = required_text(bak, "Nombre de la configuracion de backup: ")
-    name = required_text(name, "Nombre de la base de datos: ")
 
     names = [n.strip() for n in name.split(",") if n.strip()]
 
     with session_scope() as session:
+        backup = bak_repository.get(session, conn, bak)
+        if backup is None:
+            console.print(
+                f"[red]No se pudo encontrar la configuracion de backup: {bak}[/]"
+            )
+            raise typer.Exit(code=1)
+
         if len(names) == 1:
             result = repository.add(session, bak, names[0])
             if result:

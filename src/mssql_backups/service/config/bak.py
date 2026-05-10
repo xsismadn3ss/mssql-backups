@@ -6,7 +6,6 @@ from rich.table import Table
 from mssql_backups.models.tables import Backup
 from mssql_backups.repository import bak_repository as repository
 from mssql_backups.service._common import (
-    RequiredOption,
     console,
     required_bool,
     required_text,
@@ -52,30 +51,40 @@ def ls(
 
 @app.command()
 def add(
-    conn: str = RequiredOption(
-        "--conn",
-        "-c",
+    conn: str = typer.Option(
+        ...,
+        "--conn", "-c",
         help="Nombre de la conexión",
+        prompt=True,
+        prompt_required=True,
     ),
-    bak: str = RequiredOption(
-        "--name",
-        "-n",
+    bak: str = typer.Option(
+        ...,
+        "--name", "-n",
         help="Nombre del backup",
+        prompt=True,
+        prompt_required=True,
     ),
-    description: str = RequiredOption(
-        "--description",
-        "-d",
+    description: str = typer.Option(
+        ...,
+        "--description", "-d",
         help="Descripción del backup",
+        prompt=True,
+        prompt_required=True,
     ),
-    backup_dir: str = RequiredOption(
-        "--backup-dir",
-        "-bdir",
+    backup_dir: str = typer.Option(
+        ...,
+        "--backup-dir", "-bdir",
         help="Directorio de backups",
+        prompt=True,
+        prompt_required=True,
     ),
-    data_dir: str = RequiredOption(
-        "--data-dir",
-        "-ddir",
+    data_dir: str = typer.Option(
+        ...,
+        "--data-dir", "-ddir",
         help="Directorio de datos",
+        prompt=True,
+        prompt_required=True,
     ),
     is_container: bool = typer.Option(
         ...,
@@ -124,8 +133,8 @@ def add(
 
 @app.command()
 def rm(
-    conn: str = RequiredOption("--conn", "-c", help="Nombre de la conexión"),
-    bak: str = RequiredOption("--bak", "-b", help="Nombre del backup a eliminar"),
+    conn: str = typer.Option("--conn", "-c", help="Nombre de la conexión", prompt=True, prompt_required=True),
+    bak: str = typer.Option("--bak", "-b", help="Nombre del backup a eliminar", prompt=True, prompt_required=True),
 ) -> None:
 
     with console.status("Eliminando backup..."):

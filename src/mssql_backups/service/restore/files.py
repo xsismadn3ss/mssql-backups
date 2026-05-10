@@ -7,16 +7,16 @@ from mssql_backups.repository import (
     container_repository,
     local_file_repository,
 )
-from mssql_backups.service._common import RequiredOption, console, session_scope
+from mssql_backups.service._common import console, session_scope
 
 
 def files(
-    conn: str = RequiredOption(
+    conn: str = typer.Option(
         "--conn",
         "-c",
         help="Nombre de la conexión",
     ),
-    bak: str = RequiredOption(
+    bak: str = typer.Option(
         "--bak",
         "-b",
         help="Nombre de la configuración de backup",

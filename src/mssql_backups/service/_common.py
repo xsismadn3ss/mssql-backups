@@ -17,16 +17,7 @@ def session_scope() -> Generator[Session, None, None]:
     engine = get_engine()
     create_tables(engine)
     with Session(engine) as session:
-        yield session
-
-
-def RequiredOption(*params_decls, default=..., help: str):
-    return typer.Option(
-        *params_decls,
-        help=help,
-        prompt=True,
-        prompt_required=True,
-    )
+        yield session   
 
 
 def required_text(
