@@ -2,15 +2,19 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from functools import wraps
-from typing import Any
+from typing import Any, Protocol
 
 import typer
 
 from mssql_backups.service._common import console
 
 
+class _PromptFactory(Protocol):
+    def __call__(self, *args: Any, **kwargs: Any) -> str: ...
+
+
 def confirm_destructive_action(
-    message: str | Callable[..., str],
+    message: str | _PromptFactory,
     *,
     cancel_message: str = "Operación cancelada",
     exit_code: int = 1,
@@ -19,9 +23,11 @@ def confirm_destructive_action(
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any):
             try:
-                prompt = message(*args, **kwargs) if callable(message) else message
+                prompt = (
+                    message if isinstance(message, str) else message(*args, **kwargs)
+                )
             except Exception:
                 prompt = "¿Deseas continuar?"
 
