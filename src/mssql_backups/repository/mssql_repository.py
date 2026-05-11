@@ -195,9 +195,11 @@ def backup_db(
     connection: Connection,
     path: str,
     db_name: str,
+    *,
+    stream_output: bool = True,
 ) -> None:
     query = (
         f"BACKUP DATABASE [{_sql_identifier(db_name)}] "
         f"TO DISK = '{_sql_literal(path)}' WITH INIT;"
     )
-    _run_sqlcmd(connection, query, stream_output=True)
+    _run_sqlcmd(connection, query, stream_output=stream_output)
