@@ -1,25 +1,23 @@
 """
-Listado de utilidades para trabajar con MSSQL
+Listado de utilidades para trabajar con MSSQL usando `sqlcmd`.
 """
-
-from urllib.parse import quote_plus
-
-from sqlalchemy import Engine, create_engine
 
 from mssql_backups.models.tables import Connection
 
 
-def engine(config: Connection) -> Engine:
-    driver = "ODBC Driver 18 for SQL Server"
-    odbc_str = (
-        f"DRIVER={{{driver}}};"
-        f"SERVER={config.host},{config.port};"
-        f"DATABASE=master;"
-        f"UID={config.username};"
-        f"PWD={config.password};"
-        f"TrustServerCertificate=yes;"
-        f"Encrypt=no;"
-    )
-    conn_str = f"mssql+pyodbc:///?odbc_connect={quote_plus(odbc_str)}"
-    engine = create_engine(conn_str)
-    return engine
+def sqlcmd_base_args(config: Connection) -> list[str]:
+    """Construye los argumentos base de `sqlcmd` para conectarse a SQL Server."""
+    server = f"{config.host},{config.port}"
+    command = ["sqlcmd", "-S", server, "-d", "master", "-b", "-l", "30", "-C"]
+
+    if config.username:
+        command.extend(["-U", config.username, "-P", config.password])
+    else:
+        command.append("-E")
+
+    return command
+
+
+def engine(config: Connection) -> list[str]:
+    """Compatibilidad temporal con el nombre anterior; ahora devuelve argumentos de `sqlcmd`."""
+    return sqlcmd_base_args(config)

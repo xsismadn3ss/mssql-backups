@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import typer
 
+from mssql_backups.decorators import cache_required, timed_command
+
 from .bak import app as bak_app
 from .conn import app as conn_app
 from .db import app as db_app
@@ -14,6 +16,8 @@ app.add_typer(db_app, name="db")
 
 
 @app.command()
+@timed_command()
+@cache_required
 def status():
     """
     Mostrar estatus de las configuraciones guardars. Utiliza este comando para ver de forma

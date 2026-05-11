@@ -17,7 +17,7 @@ def session_scope() -> Generator[Session, None, None]:
     engine = get_engine()
     create_tables(engine)
     with Session(engine) as session:
-        yield session
+        yield session   
 
 
 def required_text(
