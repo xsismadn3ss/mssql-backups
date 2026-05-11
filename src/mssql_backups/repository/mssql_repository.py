@@ -59,6 +59,50 @@ def _read_filelist_output(output: str) -> list[list[str]]:
     return rows
 
 
+def get_log_file_info(
+    connection: Connection, physical_path: str
+) -> tuple[str, str] | None:
+    normalized_path = physical_path.replace(chr(92), "/")
+    output = _run_sqlcmd(
+        connection,
+        (
+            "SET NOCOUNT ON; "
+            "SELECT TOP 1 "
+            "DB_NAME(database_id) AS database_name, "
+            "name AS logical_name "
+            "FROM sys.master_files "
+            "WHERE type_desc = 'LOG' "
+            f"AND REPLACE(physical_name, CHAR(92), '/') = '{_sql_literal(normalized_path)}';"
+        ),
+        stream_output=False,
+        extra_args=["-s", "|", "-W", "-h", "-1"],
+    )
+    lines = [line.strip() for line in output.splitlines() if line.strip()]
+    if not lines:
+        return None
+
+    columns = [part.strip() for part in lines[0].split("|", 1)]
+    if len(columns) < 2 or not columns[0] or not columns[1]:
+        return None
+
+    return columns[0], columns[1]
+
+
+def shrink_log_file(
+    connection: Connection,
+    database_name: str,
+    logical_name: str,
+    target_size_mb: int,
+) -> None:
+    sql_command = (
+        f"USE [{_sql_identifier(database_name)}]; "
+        "SET NOCOUNT ON; "
+        "CHECKPOINT; "
+        f"DBCC SHRINKFILE (N'{_sql_literal(logical_name)}', {target_size_mb});"
+    )
+    _run_sqlcmd(connection, sql_command, stream_output=False)
+
+
 def test_conn(connection: Connection) -> bool:
     try:
         result = _run_sqlcmd(
