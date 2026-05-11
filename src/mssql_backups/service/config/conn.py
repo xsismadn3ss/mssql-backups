@@ -4,6 +4,7 @@ import typer
 from rich.table import Table
 from sqlmodel import Session
 
+from mssql_backups.callbacks import confirm
 from mssql_backups.decorators import (
     cache_required,
     confirm_destructive_action,
@@ -24,6 +25,7 @@ app = typer.Typer(help="Administrar conexiones guardadas")
 @cache_required
 @with_session
 def ls(session: Session) -> None:
+    """Listar todas las configuraciones de conexiones guardadas."""
     with console.status("Cargando conexiones..."):
         connections = repository.list(session)
 
@@ -63,6 +65,7 @@ def add(
         None, "--password", "-pass", help="Contraseña de SQL Server"
     ),
 ) -> None:
+    """Agregar una nueva configuración de conexión guardada."""
     connection_name = required_text(name, "Nombre de la conexión")
     connection_host = required_text(host, "Host")
     connection_port = required_int(port, "Puerto")
@@ -98,11 +101,13 @@ def rm(
     name: str | None = typer.Option(
         None,
         "--name",
+        "-n",
         help="Nombre de la conexión a eliminar",
         prompt=True,
         prompt_required=True,
     ),
 ) -> None:
+    """Eliminar una configuración de conexión guardada."""
     name = required_text(name, "Nombre de la conexión a eliminar")
 
     with console.status("Eliminando conexión..."):
@@ -111,3 +116,8 @@ def rm(
             console.print(f"[red]No existe una conexión llamada {name}[/]")
             raise typer.Exit(code=1)
         console.print(f"[green]Conexión eliminada:[/] {name}")
+
+
+@app.callback()
+def callback(force: bool = False):
+    confirm(force)

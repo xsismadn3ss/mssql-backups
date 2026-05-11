@@ -1,6 +1,7 @@
 import typer
 from rich.console import Console
 
+from mssql_backups.callbacks import confirm
 from mssql_backups.decorators import confirm_destructive_action, timed_command
 from mssql_backups.utils.local import create_tables, get_db_path, get_engine
 
@@ -10,6 +11,8 @@ app = typer.Typer(name="cache", help="Administrar cache de datos para configurac
 @app.command()
 @timed_command()
 def init():
+    """Iniciar memoria caché local"""
+
     console = Console()
 
     with console.status("Creando cache..."):
@@ -23,6 +26,8 @@ def init():
 @timed_command()
 @confirm_destructive_action("¿Eliminar la memoria caché local?")
 def clean():
+    """Eliminar la memoria caché local"""
+
     base_dir = get_db_path().parent
     db_path = get_db_path()
     if db_path.exists():
@@ -37,3 +42,8 @@ def clean():
         base_dir.rmdir()
     console = Console()
     console.print("[cyan]Cache eliminado[/]")
+
+
+@app.callback()
+def callback(force: bool = False):
+    confirm(force)
