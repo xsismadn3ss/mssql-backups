@@ -1,6 +1,7 @@
 import typer
 from rich.table import Table
 
+from mssql_backups.decorators import cache_required
 from mssql_backups.repository import bak_repository
 from mssql_backups.repository import db_name_repository as repository
 from mssql_backups.service._common import (
@@ -15,6 +16,7 @@ app = typer.Typer(
 
 
 @app.command()
+@cache_required
 def ls(
     bak: str | None = typer.Option(
         None,
@@ -54,6 +56,7 @@ def ls(
 
 
 @app.command()
+@cache_required
 def add(
     bak: str = typer.Option(
         ...,
@@ -115,6 +118,7 @@ def add(
 
 
 @app.command()
+@cache_required
 def rm(
     bak: str = typer.Option(
         ..., "--bak", "--backup", "-b", help="nombre de la configuracion de backup"

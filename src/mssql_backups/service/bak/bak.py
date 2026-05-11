@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import typer
 
+from mssql_backups.decorators import cache_required
+
 from .start.workflow import start_backup_process
 
 app = typer.Typer(help="Gestiona procesos de backup")
 
 
 @app.command()
+@cache_required
 def start(
     name: str = typer.Option(
         ...,

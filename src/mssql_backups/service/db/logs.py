@@ -13,6 +13,7 @@ from rich.progress import (
 )
 from rich.table import Table
 
+from mssql_backups.decorators import cache_required
 from mssql_backups.models.tables import Backup, Connection
 from mssql_backups.repository import (
     bak_repository,
@@ -162,6 +163,7 @@ def _show_failed_logs(failed_logs: list[tuple[str, str]]) -> None:
 
 
 @app.command()
+@cache_required
 def reduce(
     conn: str = typer.Option(
         None,

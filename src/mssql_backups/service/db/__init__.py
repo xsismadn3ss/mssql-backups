@@ -1,5 +1,6 @@
 import typer
 
+from mssql_backups.decorators import cache_required
 from mssql_backups.repository import conn_repository, mssql_repository
 from mssql_backups.service._common import console, session_scope
 
@@ -11,6 +12,7 @@ app.add_typer(logs_app, name="logs")
 
 
 @app.command()
+@cache_required
 def test(
     conn: str = typer.Option(
         ...,
@@ -43,6 +45,7 @@ def test(
 
 
 @app.command()
+@cache_required
 def ls(
     conn: str = typer.Option(
         ...,

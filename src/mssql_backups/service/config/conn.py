@@ -3,6 +3,7 @@ from __future__ import annotations
 import typer
 from rich.table import Table
 
+from mssql_backups.decorators import cache_required
 from mssql_backups.models.tables import Connection
 from mssql_backups.repository import conn_repository as repository
 from mssql_backups.service._common import (
@@ -16,6 +17,7 @@ app = typer.Typer(help="Administrar conexiones guardadas")
 
 
 @app.command()
+@cache_required
 def ls() -> None:
     with console.status("Cargando conexiones..."):
         with session_scope() as session:
@@ -43,6 +45,7 @@ def ls() -> None:
 
 
 @app.command()
+@cache_required
 def add(
     name: str | None = typer.Option(None, "--name", "-n", help="Nombre de la conexión"),
     host: str | None = typer.Option(None, "--host", "-h", help="Host del servidor"),
@@ -80,6 +83,7 @@ def add(
 
 
 @app.command()
+@cache_required
 def rm(
     name: str | None = typer.Option(
         None, "--name", help="Nombre de la conexión a eliminar"

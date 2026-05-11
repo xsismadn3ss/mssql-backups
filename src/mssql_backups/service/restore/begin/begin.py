@@ -11,6 +11,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
+from mssql_backups.decorators import cache_required
 from mssql_backups.service._common import console
 
 from .helpers import (
@@ -23,6 +24,7 @@ from .helpers import (
 from .state_machine import RestoreStateMachine
 
 
+@cache_required
 def begin(
     conn: str = typer.Option(
         None,

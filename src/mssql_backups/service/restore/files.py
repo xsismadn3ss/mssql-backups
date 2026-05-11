@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import typer
 
+from mssql_backups.decorators import cache_required
 from mssql_backups.repository import (
     bak_repository,
     container_repository,
@@ -10,6 +11,7 @@ from mssql_backups.repository import (
 from mssql_backups.service._common import console, session_scope
 
 
+@cache_required
 def files(
     conn: str = typer.Option(
         "--conn",

@@ -3,6 +3,7 @@ from __future__ import annotations
 import typer
 from rich.table import Table
 
+from mssql_backups.decorators import cache_required
 from mssql_backups.models.tables import Backup
 from mssql_backups.repository import bak_repository as repository
 from mssql_backups.service._common import (
@@ -16,6 +17,7 @@ app = typer.Typer(help="Administrar configuración de backups")
 
 
 @app.command()
+@cache_required
 def ls(
     conn: str | None = typer.Option(None, "--conn", "-c", help="Nombre de la conexión"),
 ) -> None:
@@ -50,38 +52,44 @@ def ls(
 
 
 @app.command()
+@cache_required
 def add(
     conn: str = typer.Option(
         ...,
-        "--conn", "-c",
+        "--conn",
+        "-c",
         help="Nombre de la conexión",
         prompt=True,
         prompt_required=True,
     ),
     bak: str = typer.Option(
         ...,
-        "--name", "-n",
+        "--name",
+        "-n",
         help="Nombre del backup",
         prompt=True,
         prompt_required=True,
     ),
     description: str = typer.Option(
         ...,
-        "--description", "-d",
+        "--description",
+        "-d",
         help="Descripción del backup",
         prompt=True,
         prompt_required=True,
     ),
     backup_dir: str = typer.Option(
         ...,
-        "--backup-dir", "-bdir",
+        "--backup-dir",
+        "-bdir",
         help="Directorio de backups",
         prompt=True,
         prompt_required=True,
     ),
     data_dir: str = typer.Option(
         ...,
-        "--data-dir", "-ddir",
+        "--data-dir",
+        "-ddir",
         help="Directorio de datos",
         prompt=True,
         prompt_required=True,
@@ -132,9 +140,18 @@ def add(
 
 
 @app.command()
+@cache_required
 def rm(
-    conn: str = typer.Option("--conn", "-c", help="Nombre de la conexión", prompt=True, prompt_required=True),
-    bak: str = typer.Option("--bak", "-b", help="Nombre del backup a eliminar", prompt=True, prompt_required=True),
+    conn: str = typer.Option(
+        "--conn", "-c", help="Nombre de la conexión", prompt=True, prompt_required=True
+    ),
+    bak: str = typer.Option(
+        "--bak",
+        "-b",
+        help="Nombre del backup a eliminar",
+        prompt=True,
+        prompt_required=True,
+    ),
 ) -> None:
 
     with console.status("Eliminando backup..."):
