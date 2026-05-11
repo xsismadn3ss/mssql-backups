@@ -1,5 +1,9 @@
 # MSSQL Backups
 
+[![PyPI Version](https://img.shields.io/pypi/v/mssql-backups)](https://pypi.org/project/mssql-backups/)
+[![Package Site](https://img.shields.io/badge/package-PyPI-blue)](https://pypi.org/project/mssql-backups/)
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-Indexed-00AEEF)](https://deepwiki.com/xsismadn3ss/mssql-backups)
+
 Herramienta de consola para administrar configuraciones, crear backups, restaurar bases de datos de SQL Server y limpiar logs para liberar espacio.
 
 La aplicación guarda la configuración en SQLite, ejecuta `sqlcmd` para hablar con SQL Server y puede trabajar con rutas locales o con backups dentro de contenedores Docker.
