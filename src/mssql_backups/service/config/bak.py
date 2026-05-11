@@ -4,6 +4,7 @@ import typer
 from rich.table import Table
 from sqlmodel import Session
 
+from mssql_backups.callbacks import confirm
 from mssql_backups.decorators import (
     cache_required,
     confirm_destructive_action,
@@ -118,6 +119,8 @@ def add(
         prompt_required=True,
     ),
 ) -> None:
+    """Guardar configuración de backup"""
+
     is_container = required_bool(is_container, "¿El backup está en un contenedor?")
 
     if is_container:
@@ -172,7 +175,7 @@ def rm(
         prompt_required=True,
     ),
 ) -> None:
-
+    """Eliminar configuración de backup"""
     with console.status("Eliminando backup..."):
         result = repository.rm(session, conn, bak)
         if result:
@@ -183,3 +186,8 @@ def rm(
             f"[red]No existe un backup llamado {bak} para la conexión {conn}[/]"
         )
         raise typer.Exit(code=1)
+
+
+@app.callback()
+def callback(force: bool = False):
+    confirm(force)

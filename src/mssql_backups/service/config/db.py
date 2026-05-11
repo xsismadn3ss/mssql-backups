@@ -2,6 +2,7 @@ import typer
 from rich.table import Table
 from sqlmodel import Session
 
+from mssql_backups.callbacks import confirm
 from mssql_backups.decorators import (
     cache_required,
     confirm_destructive_action,
@@ -170,3 +171,8 @@ def rm(
             console.print(f"[green]Eliminados: {', '.join(eliminados)}[/]")
         if omitidos:
             console.print(f"[red]Omitidos: {', '.join(omitidos)}[/]")
+
+
+@app.callback()
+def callback(force: bool = False):
+    confirm(force)
