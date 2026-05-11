@@ -3,7 +3,11 @@ import typer
 from mssql_backups.repository import conn_repository, mssql_repository
 from mssql_backups.service._common import console, session_scope
 
+from .logs import app as logs_app
+
 app = typer.Typer(help="Administracion y pruebas rapidas en la base de datos")
+
+app.add_typer(logs_app, name="logs")
 
 
 @app.command()
