@@ -1,8 +1,13 @@
 import typer
 
-from mssql_backups.decorators import cache_required
-from mssql_backups.repository import conn_repository, mssql_repository
-from mssql_backups.service._common import console, session_scope
+from mssql_backups.decorators import (
+    cache_required,
+    load_connection_context,
+    timed_command,
+)
+from mssql_backups.models.tables import Connection
+from mssql_backups.repository import mssql_repository
+from mssql_backups.service._common import console
 
 from .logs import app as logs_app
 
@@ -12,7 +17,9 @@ app.add_typer(logs_app, name="logs")
 
 
 @app.command()
+@timed_command()
 @cache_required
+@load_connection_context
 def test(
     conn: str = typer.Option(
         ...,
@@ -22,16 +29,10 @@ def test(
         prompt=True,
         prompt_required=True,
     ),
+    *,
+    connection: Connection,
 ):
     """Validar conexion de la base de datos"""
-    with session_scope() as session:
-        # Obtener configuracion de conexion
-        connection = conn_repository.get(session, conn)
-        if not connection:
-            console.print(f"[yellow]La conexion '{conn}' no existe[/]")
-            raise typer.Exit(code=1)
-
-    # Validar conexion a la base de datos
     with console.status(
         f"Validando conexion con [cyan]{connection.host}:{connection.port}({connection.name})[/]..."
     ):
@@ -45,7 +46,9 @@ def test(
 
 
 @app.command()
+@timed_command()
 @cache_required
+@load_connection_context
 def ls(
     conn: str = typer.Option(
         ...,
@@ -55,15 +58,10 @@ def ls(
         prompt=True,
         prompt_required=True,
     ),
+    *,
+    connection: Connection,
 ):
     """Listar las bases de datos para la conexion seleccionada"""
-    with session_scope() as session:
-        # Obtener configuracion de conexion
-        connection = conn_repository.get(session, conn)
-        if not connection:
-            console.print(f"[yellow]La conexion '{conn}' no existe[/]")
-            raise typer.Exit(code=1)
-
     # Obtener lista de bases de datos
     with console.status(
         f"Obteniendo lista de bases de datos para [cyan]{connection.host}:{connection.port}({connection.name})[/]..."

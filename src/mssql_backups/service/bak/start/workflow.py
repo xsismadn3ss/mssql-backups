@@ -11,10 +11,16 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
+from mssql_backups.decorators import (
+    cache_required,
+    load_backup_context,
+    timed_command,
+)
+from mssql_backups.models.tables import Backup, Connection
 from mssql_backups.repository import mssql_repository
 from mssql_backups.service._common import console
 
-from .context import build_backup_path, ensure_backup_directory, load_backup_context
+from .context import build_backup_path, ensure_backup_directory
 from .presentation import (
     show_backed_up_databases,
     show_failed_databases,
@@ -22,10 +28,17 @@ from .presentation import (
 )
 
 
-def start_backup_process(conn: str, name: str) -> None:
-    with console.status("[cyan]Buscando configuración guardada...[/]"):
-        connection, backup, db_names = load_backup_context(conn, name)
-
+@timed_command()
+@cache_required
+@load_backup_context(conn_param="conn", bak_param="name", db_names_param="db_names")
+def start_backup_process(
+    conn: str,
+    name: str,
+    *,
+    connection: Connection,
+    backup: Backup,
+    db_names: list[str],
+) -> None:
     if not db_names:
         console.print("[yellow]La configuración no tiene bases de datos asociadas[/]")
         raise typer.Exit(code=1)

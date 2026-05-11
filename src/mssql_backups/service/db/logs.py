@@ -13,16 +13,18 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from mssql_backups.decorators import cache_required
+from mssql_backups.decorators import (
+    cache_required,
+    load_backup_context,
+    timed_command,
+)
 from mssql_backups.models.tables import Backup, Connection
 from mssql_backups.repository import (
-    bak_repository,
-    conn_repository,
     container_repository,
     local_file_repository,
     mssql_repository,
 )
-from mssql_backups.service._common import console, session_scope
+from mssql_backups.service._common import console
 
 app = typer.Typer(help="Administrar logs", name="logs")
 
@@ -62,23 +64,6 @@ def _parse_size(size_text: str) -> int:
         raise ValueError("Solo se admiten tamaños en MB o GB")
 
     return amount * multiplier
-
-
-def _load_context(conn: str, bak: str) -> tuple[Connection, Backup]:
-    with session_scope() as session:
-        connection = conn_repository.get(session, conn)
-        if connection is None:
-            console.print(f"[red]No existe una conexión llamada {conn}[/]")
-            raise typer.Exit(code=1)
-
-        backup = bak_repository.get(session, conn, bak)
-        if backup is None:
-            console.print(
-                f"[red]No existe una configuración de backup llamada {bak} para la conexión {conn}[/]"
-            )
-            raise typer.Exit(code=1)
-
-        return connection, backup
 
 
 def _list_log_files(backup: Backup) -> list[tuple[str, int]]:
@@ -163,7 +148,9 @@ def _show_failed_logs(failed_logs: list[tuple[str, str]]) -> None:
 
 
 @app.command()
+@timed_command()
 @cache_required
+@load_backup_context
 def reduce(
     conn: str = typer.Option(
         None,
@@ -181,6 +168,9 @@ def reduce(
         prompt=True,
         prompt_required=True,
     ),
+    *,
+    connection: Connection,
+    backup: Backup,
     target: str = typer.Option(
         DEFAULT_TARGET,
         "--target",
@@ -209,9 +199,6 @@ def reduce(
     target_mb = target_bytes // BYTES_PER_MB
     threshold_label = _format_size(threshold_bytes)
     target_label = _format_size(target_bytes)
-
-    with console.status("Cargando configuración de conexión y backup..."):
-        connection, backup = _load_context(conn, bak)
 
     with console.status("Buscando archivos .ldf..."):
         log_files = _list_log_files(backup)

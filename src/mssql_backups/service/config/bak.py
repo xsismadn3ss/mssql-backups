@@ -2,15 +2,19 @@ from __future__ import annotations
 
 import typer
 from rich.table import Table
+from sqlmodel import Session
 
-from mssql_backups.decorators import cache_required
+from mssql_backups.decorators import (
+    cache_required,
+    confirm_destructive_action,
+    with_session,
+)
 from mssql_backups.models.tables import Backup
 from mssql_backups.repository import bak_repository as repository
 from mssql_backups.service._common import (
     console,
     required_bool,
     required_text,
-    session_scope,
 )
 
 app = typer.Typer(help="Administrar configuración de backups")
@@ -18,42 +22,45 @@ app = typer.Typer(help="Administrar configuración de backups")
 
 @app.command()
 @cache_required
+@with_session
 def ls(
+    session: Session,
     conn: str | None = typer.Option(None, "--conn", "-c", help="Nombre de la conexión"),
 ) -> None:
     """Listar configuración de backups guardados"""
     with console.status("Cargando backups"):
-        with session_scope() as session:
-            backups = repository.ls(session, conn)
+        backups = repository.ls(session, conn)
 
-            if not backups:
-                console.print("[yellow]No hay configuración de backups guardados[/]")
-                return
+        if not backups:
+            console.print("[yellow]No hay configuración de backups guardados[/]")
+            return
 
-            table = Table(title="Configuraciones de backups")
-            table.add_column("Nombre", justify="left")
-            table.add_column("Conexión", justify="left")
-            table.add_column("Descripción", justify="left")
-            table.add_column("backup_dir", justify="left")
-            table.add_column("data_dir", justify="left")
-            table.add_column("contenedor", justify="left")
+        table = Table(title="Configuraciones de backups")
+        table.add_column("Nombre", justify="left")
+        table.add_column("Conexión", justify="left")
+        table.add_column("Descripción", justify="left")
+        table.add_column("backup_dir", justify="left")
+        table.add_column("data_dir", justify="left")
+        table.add_column("contenedor", justify="left")
 
-            for backup in backups:
-                table.add_row(
-                    f"[magenta]{backup.name}[/]",
-                    f"[magenta]{backup.conn.name}[/]" if backup.conn else "",
-                    backup.description or "",
-                    f"[cyan]{backup.backup_dir}[/]",
-                    f"[cyan]{backup.data_dir}[/]",
-                    f"[blue]{backup.container_name}[/]" or "",
-                )
+        for backup in backups:
+            table.add_row(
+                f"[magenta]{backup.name}[/]",
+                f"[magenta]{backup.conn.name}[/]" if backup.conn else "",
+                backup.description or "",
+                f"[cyan]{backup.backup_dir}[/]",
+                f"[cyan]{backup.data_dir}[/]",
+                f"[blue]{backup.container_name}[/]" or "",
+            )
 
-            console.print(table)
+        console.print(table)
 
 
 @app.command()
 @cache_required
+@with_session
 def add(
+    session: Session,
     conn: str = typer.Option(
         ...,
         "--conn",
@@ -119,33 +126,45 @@ def add(
         container_name_value = None
 
     with console.status("Guardando configuración"):
-        with session_scope() as session:
-            backup = Backup(
-                name=bak,
-                description=description,
-                backup_dir=backup_dir,
-                data_dir=data_dir,
-                is_container=is_container,
-                container_name=container_name_value,
-            )
-            result = repository.add(session, conn, backup)
-            if result:
-                console.print(f"[green]Backup guardado:[/] {bak}")
-                return
+        backup = Backup(
+            name=bak,
+            description=description,
+            backup_dir=backup_dir,
+            data_dir=data_dir,
+            is_container=is_container,
+            container_name=container_name_value,
+        )
+        result = repository.add(session, conn, backup)
+        if result:
+            console.print(f"[green]Backup guardado:[/] {bak}")
+            return
 
-            console.print(
-                f"[red]No se pudo guardar el backup {bak} para la conexión {conn}[/]"
-            )
-            raise typer.Exit(code=1)
+        console.print(
+            f"[red]No se pudo guardar el backup {bak} para la conexión {conn}[/]"
+        )
+        raise typer.Exit(code=1)
 
 
 @app.command()
 @cache_required
+@confirm_destructive_action(
+    lambda *args, **kwargs: (
+        f"¿Eliminar el backup {kwargs.get('bak') or 'seleccionado'}?"
+    )
+)
+@with_session
 def rm(
+    session: Session,
     conn: str = typer.Option(
-        "--conn", "-c", help="Nombre de la conexión", prompt=True, prompt_required=True
+        None,
+        "--conn",
+        "-c",
+        help="Nombre de la conexión",
+        prompt=True,
+        prompt_required=True,
     ),
     bak: str = typer.Option(
+        None,
         "--bak",
         "-b",
         help="Nombre del backup a eliminar",
@@ -155,13 +174,12 @@ def rm(
 ) -> None:
 
     with console.status("Eliminando backup..."):
-        with session_scope() as session:
-            result = repository.rm(session, conn, bak)
-            if result:
-                console.print(f"[green]Backup eliminado:[/] {bak}")
-                return
+        result = repository.rm(session, conn, bak)
+        if result:
+            console.print(f"[green]Backup eliminado:[/] {bak}")
+            return
 
-            console.print(
-                f"[red]No existe un backup llamado {bak} para la conexión {conn}[/]"
-            )
-            raise typer.Exit(code=1)
+        console.print(
+            f"[red]No existe un backup llamado {bak} para la conexión {conn}[/]"
+        )
+        raise typer.Exit(code=1)

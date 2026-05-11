@@ -11,12 +11,16 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 
-from mssql_backups.decorators import cache_required
+from mssql_backups.decorators import (
+    cache_required,
+    load_backup_context,
+    timed_command,
+)
+from mssql_backups.models.tables import Backup, Connection
 from mssql_backups.service._common import console
 
 from .helpers import (
     list_backup_files,
-    load_backup_context,
     print_backup_files,
     print_restore_result,
     print_restore_summary,
@@ -24,7 +28,9 @@ from .helpers import (
 from .state_machine import RestoreStateMachine
 
 
+@timed_command()
 @cache_required
+@load_backup_context
 def begin(
     conn: str = typer.Option(
         None,
@@ -42,12 +48,13 @@ def begin(
         prompt=True,
         prompt_required=True,
     ),
+    *,
+    connection: Connection,
+    backup: Backup,
 ) -> None:
     """
     Inicia la restauración de una configuración de backup.
     """
-    connection, backup = load_backup_context(conn, bak)
-
     files = list_backup_files(backup)
     if not files:
         console.print("[yellow]No se encontraron archivos de backups[/]")

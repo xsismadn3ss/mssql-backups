@@ -2,42 +2,45 @@ from __future__ import annotations
 
 import typer
 
-from mssql_backups.decorators import cache_required
-from mssql_backups.repository import (
-    bak_repository,
-    container_repository,
-    local_file_repository,
+from mssql_backups.decorators import (
+    cache_required,
+    load_backup_context,
+    timed_command,
 )
-from mssql_backups.service._common import console, session_scope
+from mssql_backups.models.tables import Backup, Connection
+from mssql_backups.repository import container_repository, local_file_repository
+from mssql_backups.service._common import console
 
 
+@timed_command()
 @cache_required
+@load_backup_context(connection_param="_connection")
 def files(
     conn: str = typer.Option(
+        None,
         "--conn",
         "-c",
         help="Nombre de la conexión",
+        prompt=True,
+        prompt_required=True,
     ),
     bak: str = typer.Option(
+        None,
         "--bak",
         "-b",
         help="Nombre de la configuración de backup",
+        prompt=True,
+        prompt_required=True,
     ),
+    *,
+    _connection: Connection,
+    backup: Backup,
 ) -> None:
     """
     Lista los archivos de backup disponibles
     """
 
     with console.status("Cargando..."):
-        with session_scope() as session:
-            backup = bak_repository.get(session, conn, bak)
-
-            if backup is None:
-                console.print(
-                    f"[red]No existe una configuración de backup llamada {bak} para la conexión {conn}[/]"
-                )
-                raise typer.Exit(code=1)
-
         if backup.is_container:
             files = container_repository.list_files(backup, "backup_dir")
         else:

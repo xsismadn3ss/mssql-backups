@@ -1,7 +1,7 @@
 import typer
 
 from mssql_backups import service
-from mssql_backups.decorators import errror_hanlder
+from mssql_backups.decorators import error_handler
 
 app = typer.Typer(
     help="""
@@ -19,7 +19,7 @@ app.add_typer(service.db, name="db")
 app.add_typer(service.bak, name="bak")
 
 
-@errror_hanlder
+@error_handler
 def main():
     app()
 
