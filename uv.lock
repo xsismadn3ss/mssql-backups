@@ -216,7 +216,7 @@ wheels = [
 
 [[package]]
 name = "mssql-backups"
-version = "3.8.2b1"
+version = "3.9.0b1"
 source = { editable = "." }
 dependencies = [
     { name = "docker" },
