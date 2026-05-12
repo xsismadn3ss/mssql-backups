@@ -1,8 +1,8 @@
 [![PyPI Version](https://img.shields.io/pypi/v/mssql-backups)](https://pypi.org/project/mssql-backups/)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/xsismadn3ss/mssql-backups)
-[![UV Tool](https://img.shields.io/badge/uv-tool-a20090?logo=uv)]()
-[![Python Package](https://img.shields.io/badge/Python_Package-113050?logo=python)]()
-[![Python Package](https://img.shields.io/badge/typer-app-113050?logo=Typer)]()
+[![UV Tool](https://img.shields.io/badge/uv-tool-a20090?logo=uv)](#)
+[![Python Package](https://img.shields.io/badge/Python_Package-113050?logo=python)](#)
+[![Python Package](https://img.shields.io/badge/typer-app-113050?logo=Typer)](#)
 
 # MSSQL Backups
 Herramienta de consola para administrar configuraciones, crear backups, restaurar bases de datos de SQL Server y limpiar logs para liberar espacio.
