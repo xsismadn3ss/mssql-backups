@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mssql-backups"
-version = "3.13.3"
+version = "3.13.4"
 description = "Restura bases de datos, crea backups y limpia logs de SQL Server, todo en un solo CLI"
 readme = "README.md"
 requires-python = ">=3.12"
