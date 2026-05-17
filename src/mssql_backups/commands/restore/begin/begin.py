@@ -17,7 +17,7 @@ from mssql_backups.decorators import (
     timed_command,
 )
 from mssql_backups.models.tables import Backup, Connection
-from mssql_backups.service._common import console
+from mssql_backups.commands._common import console
 
 from .helpers import (
     list_backup_files,

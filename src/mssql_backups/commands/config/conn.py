@@ -12,7 +12,7 @@ from mssql_backups.decorators import (
 )
 from mssql_backups.models.tables import Connection
 from mssql_backups.repository import conn_repository as repository
-from mssql_backups.service._common import (
+from mssql_backups.commands._common import (
     console,
     required_int,
     required_text,

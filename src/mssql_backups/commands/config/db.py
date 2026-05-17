@@ -10,7 +10,7 @@ from mssql_backups.decorators import (
 )
 from mssql_backups.repository import bak_repository
 from mssql_backups.repository import db_name_repository as repository
-from mssql_backups.service._common import (
+from mssql_backups.commands._common import (
     console,
     required_text,
 )

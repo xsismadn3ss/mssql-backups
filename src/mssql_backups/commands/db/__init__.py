@@ -7,7 +7,7 @@ from mssql_backups.decorators import (
 )
 from mssql_backups.models.tables import Connection
 from mssql_backups.repository import mssql_repository
-from mssql_backups.service._common import console
+from mssql_backups.commands._common import console
 
 from .logs import app as logs_app
 

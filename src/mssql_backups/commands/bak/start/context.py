@@ -11,7 +11,7 @@ from mssql_backups.repository import (
     container_repository,
     local_file_repository,
 )
-from mssql_backups.service._common import console, session_scope
+from mssql_backups.commands._common import console, session_scope
 
 
 def load_backup_context(conn: str, name: str) -> tuple[Connection, Backup, list[str]]:

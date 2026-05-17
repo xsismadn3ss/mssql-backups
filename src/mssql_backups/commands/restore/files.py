@@ -9,7 +9,7 @@ from mssql_backups.decorators import (
 )
 from mssql_backups.models.tables import Backup, Connection
 from mssql_backups.repository import container_repository, local_file_repository
-from mssql_backups.service._common import console
+from mssql_backups.commands._common import console
 
 
 @timed_command()

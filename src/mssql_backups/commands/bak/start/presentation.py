@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from rich.table import Table
 
-from mssql_backups.service._common import console
+from mssql_backups.commands._common import console
 
 
 def show_backed_up_databases(backed_up_dbs: list[str], backup_path: str) -> None:

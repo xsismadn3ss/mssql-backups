@@ -24,7 +24,7 @@ from mssql_backups.repository import (
     local_file_repository,
     mssql_repository,
 )
-from mssql_backups.service._common import console
+from mssql_backups.commands._common import console
 
 app = typer.Typer(help="Administrar logs", name="logs")
 
