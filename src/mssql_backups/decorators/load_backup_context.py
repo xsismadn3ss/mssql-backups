@@ -8,7 +8,7 @@ from typing import Any
 import typer
 
 from mssql_backups.repository import bak_repository, conn_repository
-from mssql_backups.service._common import console, session_scope
+from mssql_backups.commands._common import console, session_scope
 
 from ._helpers import _signature_without
 

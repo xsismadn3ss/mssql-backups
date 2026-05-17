@@ -7,7 +7,7 @@ from typing import Any
 from rich.console import Console
 
 
-def errror_hanlder(func: Callable[..., Any]) -> Callable[..., Any]:
+def error_handler(func: Callable[..., Any]) -> Callable[..., Any]:
     """Maneja errores comunes de la CLI y muestra mensajes amigables."""
     console_local = Console()
 
@@ -26,7 +26,4 @@ def errror_hanlder(func: Callable[..., Any]) -> Callable[..., Any]:
     return wrapper
 
 
-error_handler = errror_hanlder
-
-
-__all__ = ["errror_hanlder", "error_handler"]
+__all__ = ["error_handler"]

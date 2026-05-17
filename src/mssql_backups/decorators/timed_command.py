@@ -5,7 +5,7 @@ from functools import wraps
 from time import perf_counter
 from typing import Any, Protocol
 
-from mssql_backups.service._common import console
+from mssql_backups.commands._common import console
 
 
 class _LabelFactory(Protocol):

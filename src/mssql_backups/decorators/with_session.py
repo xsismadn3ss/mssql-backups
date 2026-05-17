@@ -5,7 +5,7 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Any
 
-from mssql_backups.service._common import session_scope
+from mssql_backups.commands._common import session_scope
 
 from ._helpers import _signature_without
 

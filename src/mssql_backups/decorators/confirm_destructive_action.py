@@ -8,7 +8,7 @@ from typing import Any, Protocol
 import typer
 
 from mssql_backups.context import ctx
-from mssql_backups.service._common import console
+from mssql_backups.commands._common import console
 
 
 class _PromptFactory(Protocol):
