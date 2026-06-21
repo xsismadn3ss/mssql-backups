@@ -31,4 +31,4 @@ def status():
     print()
     bak_ls(conn=None)
     print()
-    db_ls(bak=None)
+    db_ls(bak=None, all=True)

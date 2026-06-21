@@ -5,6 +5,12 @@ from rich.table import Table
 from sqlmodel import Session
 
 from mssql_backups.callbacks import confirm
+from mssql_backups.commands._common import (
+    console,
+    required_int,
+    required_text,
+)
+from mssql_backups.commands.selectors import conn_selector
 from mssql_backups.decorators import (
     cache_required,
     confirm_destructive_action,
@@ -12,11 +18,6 @@ from mssql_backups.decorators import (
 )
 from mssql_backups.models.tables import Connection
 from mssql_backups.repository import conn_repository as repository
-from mssql_backups.commands._common import (
-    console,
-    required_int,
-    required_text,
-)
 
 app = typer.Typer(help="Administrar conexiones guardadas")
 
@@ -57,7 +58,7 @@ def add(
     session: Session,
     name: str | None = typer.Option(None, "--name", "-n", help="Nombre de la conexión"),
     host: str | None = typer.Option(None, "--host", "-h", help="Host del servidor"),
-    port: int | None = typer.Option(None, "--port", "-p", help="Puerto del servidor"),
+    port: int | None = typer.Option(1433, "--port", "-p", help="Puerto del servidor"),
     username: str | None = typer.Option(
         None, "--username", "-u", help="Usuario de SQL Server"
     ),
@@ -103,12 +104,11 @@ def rm(
         "--name",
         "-n",
         help="Nombre de la conexión a eliminar",
-        prompt=True,
-        prompt_required=True,
     ),
 ) -> None:
     """Eliminar una configuración de conexión guardada."""
-    name = required_text(name, "Nombre de la conexión a eliminar")
+    if not name:
+        name = conn_selector.select_conn(session)
 
     with console.status("Eliminando conexión..."):
         result = repository.remove(session, name)

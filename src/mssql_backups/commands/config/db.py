@@ -3,6 +3,8 @@ from rich.table import Table
 from sqlmodel import Session
 
 from mssql_backups.callbacks import confirm
+from mssql_backups.commands._common import console
+from mssql_backups.commands.selectors import bak_selector, conn_selector, db_selector
 from mssql_backups.decorators import (
     cache_required,
     confirm_destructive_action,
@@ -10,10 +12,6 @@ from mssql_backups.decorators import (
 )
 from mssql_backups.repository import bak_repository
 from mssql_backups.repository import db_name_repository as repository
-from mssql_backups.commands._common import (
-    console,
-    required_text,
-)
 
 app = typer.Typer(
     help="Manajear nombres de bases de datos relacionados con configuraciones de backup"
@@ -28,14 +26,18 @@ def ls(
     bak: str | None = typer.Option(
         None,
         "--bak",
-        "--backup",
         "-b",
         help="nombre de la configuracion de backup, filtra los resultados por este valor",
+    ),
+    all: bool = typer.Option(
+        False, "--all", "-a", help="Mostrar todas las bases de datos"
     ),
 ):
     """
     Listar nombres de bases de datos
     """
+    if not bak and not all:
+        bak = bak_selector.select_bak(session)
 
     with console.status("Cargando..."):
         db_names = repository.ls(session, bak)
@@ -64,23 +66,17 @@ def ls(
 @with_session
 def add(
     session: Session,
-    bak: str = typer.Option(
-        ...,
+    bak: str | None = typer.Option(
+        None,
         "--bak",
-        "--backup",
         "-b",
         help="nombre de la configuracion de backup",
-        prompt=True,
-        prompt_required=True,
     ),
-    conn: str = typer.Option(
-        ...,
+    conn: str | None = typer.Option(
+        None,
         "--conn",
-        "--connection",
         "-c",
         help="nombre de la conexion",
-        prompt=True,
-        prompt_required=True,
     ),
     name: str = typer.Option(
         ...,
@@ -96,6 +92,10 @@ def add(
 
     Tambien se pueden guardar multiples nombres de base de datos separados por comas
     """
+    if not conn:
+        conn = conn_selector.select_conn(session)
+    if not bak:
+        bak = bak_selector.select_bak(session, conn)
 
     names = [n.strip() for n in name.split(",") if n.strip()]
 
@@ -130,22 +130,17 @@ def add(
 @with_session
 def rm(
     session: Session,
-    bak: str = typer.Option(
-        ...,
+    bak: str | None = typer.Option(
+        None,
         "--bak",
-        "--backup",
         "-b",
         help="nombre de la configuracion de backup",
-        prompt=True,
-        prompt_required=True,
     ),
-    name: str = typer.Option(
-        ...,
+    name: str | None = typer.Option(
+        None,
         "--name",
         "-n",
         help="nombre de la base de datos, tambien puede ser una lista de nombres separados por comas",
-        prompt=True,
-        prompt_required=True,
     ),
 ):
     """
@@ -153,10 +148,13 @@ def rm(
 
     Si se proporcionan multiples nombres separados por comas, se eliminaran todos los que existan en la configuracion de backup.
     """
-    bak = required_text(bak, "Nombre de la configuracion de backup: ")
-    name = required_text(name, "Nombre de la base de datos: ")
+    if not bak:
+        bak = bak_selector.select_bak(session)
 
-    names = [n.strip() for n in name.split(",") if n.strip()]
+    if name:
+        names = [n.strip() for n in name.split(",") if n.strip()]
+    else:
+        names = list(db_selector.select_dbs(session, bak))
 
     if len(names) == 1:
         result = repository.remove(session, bak, names[0])

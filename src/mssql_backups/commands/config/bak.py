@@ -5,6 +5,12 @@ from rich.table import Table
 from sqlmodel import Session
 
 from mssql_backups.callbacks import confirm
+from mssql_backups.commands._common import (
+    console,
+    required_bool,
+    required_text,
+)
+from mssql_backups.commands.selectors import bak_selector, conn_selector
 from mssql_backups.decorators import (
     cache_required,
     confirm_destructive_action,
@@ -12,11 +18,6 @@ from mssql_backups.decorators import (
 )
 from mssql_backups.models.tables import Backup
 from mssql_backups.repository import bak_repository as repository
-from mssql_backups.commands._common import (
-    console,
-    required_bool,
-    required_text,
-)
 
 app = typer.Typer(help="Administrar configuración de backups")
 
@@ -27,6 +28,7 @@ app = typer.Typer(help="Administrar configuración de backups")
 def ls(
     session: Session,
     conn: str | None = typer.Option(None, "--conn", "-c", help="Nombre de la conexión"),
+    all: bool = typer.Option(False, "--all", "-a", help="Mostrar todos los backups"),
 ) -> None:
     """Listar configuración de backups guardados"""
     with console.status("Cargando backups"):
@@ -62,13 +64,11 @@ def ls(
 @with_session
 def add(
     session: Session,
-    conn: str = typer.Option(
-        ...,
+    conn: str | None = typer.Option(
+        None,
         "--conn",
         "-c",
         help="Nombre de la conexión",
-        prompt=True,
-        prompt_required=True,
     ),
     bak: str = typer.Option(
         ...,
@@ -102,24 +102,23 @@ def add(
         prompt=True,
         prompt_required=True,
     ),
-    is_container: bool = typer.Option(
-        ...,
+    is_container: bool | None = typer.Option(
+        None,
         "--is-container/--no-is-container",
-        "-ic",
+        "-ic/-nc",
         help="Indica si el backup se guarda en un contenedor",
-        prompt=True,
-        prompt_required=True,
     ),
-    container_name: str = typer.Option(
-        ...,
+    container_name: str | None = typer.Option(
+        None,
         "--container-name",
         "-cn",
         help="Nombre del contenedor",
-        prompt=True,
-        prompt_required=True,
     ),
 ) -> None:
     """Guardar configuración de backup"""
+    # Mostrar conexiones
+    if not conn:
+        conn = conn_selector.select_conn(session)
 
     is_container = required_bool(is_container, "¿El backup está en un contenedor?")
 
@@ -158,24 +157,25 @@ def add(
 @with_session
 def rm(
     session: Session,
-    conn: str = typer.Option(
+    conn: str | None = typer.Option(
         None,
         "--conn",
         "-c",
         help="Nombre de la conexión",
-        prompt=True,
-        prompt_required=True,
     ),
-    bak: str = typer.Option(
+    bak: str | None = typer.Option(
         None,
         "--bak",
         "-b",
         help="Nombre del backup a eliminar",
-        prompt=True,
-        prompt_required=True,
     ),
 ) -> None:
     """Eliminar configuración de backup"""
+    if not conn:
+        conn = conn_selector.select_conn(session)
+    if not bak:
+        bak = bak_selector.select_bak(session, conn)
+
     with console.status("Eliminando backup..."):
         result = repository.rm(session, conn, bak)
         if result:
