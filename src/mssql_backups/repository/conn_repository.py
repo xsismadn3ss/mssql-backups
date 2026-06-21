@@ -28,7 +28,8 @@ def add(session: Session, connection: Connection):
 
 def remove(session: Session, name: str):
     if not _get(session, name):
-        return
+        return False
     connection = session.exec(select(Connection).where(Connection.name == name)).one()
     session.delete(connection)
     session.commit()
+    return True
