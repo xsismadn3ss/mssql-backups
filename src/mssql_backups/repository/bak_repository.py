@@ -23,7 +23,7 @@ def get(session: Session, conn: str, name: str) -> Optional[Backup]:
     return _get_bak(session, connection.id, name)
 
 
-def ls(session: Session, conn: Optional[str]) -> list[Backup]:
+def ls(session: Session, conn: Optional[str] = None) -> list[Backup]:
     if conn is None:
         return list(session.exec(select(Backup).order_by(Backup.name)).all())
 
