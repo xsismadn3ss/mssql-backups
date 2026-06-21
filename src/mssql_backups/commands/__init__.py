@@ -8,19 +8,19 @@ from .restore import app as restore
 def commands_dict():
     """Listado de comandos en formato de diccionario"""
     return {
-        'bak': bak,
-        'cache': cache,
-        'config': config,
-        'db': db,
-        'restore': restore,
+        "bak": bak,
+        "cache": cache,
+        "config": config,
+        "db": db,
+        "restore": restore,
     }
 
 
 __all__ = [
-    'bak',
-    'cache',
-    'config',
-    'db',
-    'restore',
-    'commands_dict',
+    "bak",
+    "cache",
+    "config",
+    "db",
+    "restore",
+    "commands_dict",
 ]

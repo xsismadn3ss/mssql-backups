@@ -14,10 +14,10 @@ from ._helpers import _signature_without
 
 
 def load_connection_context(
-        func: Callable[..., Any] | None = None,
-        *,
-        conn_param: str = "conn",
-        connection_param: str = "connection",
+    func: Callable[..., Any] | None = None,
+    *,
+    conn_param: str = "conn",
+    connection_param: str = "connection",
 ) -> Callable[..., Any]:
     """Carga una conexión desde la caché e inyecta el objeto resultante."""
 
@@ -37,8 +37,8 @@ def load_connection_context(
             bound = signature.bind_partial(*args, **kwargs)
 
             if (
-                    connection_param in bound.arguments
-                    and bound.arguments[connection_param] is not None
+                connection_param in bound.arguments
+                and bound.arguments[connection_param] is not None
             ):
                 return inner(*args, **kwargs)
 

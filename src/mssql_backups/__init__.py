@@ -18,14 +18,16 @@ app = typer.Typer(
 for key, value in commands_dict().items():
     app.add_typer(value, name=key)
 
-@app.command(name='version')
+
+@app.command(name="version")
 def version_info():
     """Version del cli"""
     version = AppConfig.version
     name = AppConfig.name
 
     console = Console()
-    console.print(f'[dim]{name}[/] [green]{version}[/]')
+    console.print(f"[dim]{name}[/] [green]{version}[/]")
+
 
 @error_handler
 def main():
